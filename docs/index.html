@@ -629,6 +629,10 @@
                 <label for="topK">Rows shown</label>
                 <input id="topK" name="top_k" type="number" min="1" max="1000" value="25">
               </div>
+              <div class="field">
+                <label for="maxAlternatives">Max alternatives</label>
+                <input id="maxAlternatives" name="max_alternatives" type="number" min="0" max="10000" value="300">
+              </div>
               <div class="field full">
                 <label for="costCriteria">Cost criteria for crisp uploads</label>
                 <input id="costCriteria" name="cost_criteria" type="text" placeholder="Example: cost, price, delay">
@@ -785,6 +789,7 @@
       data.append("seed", document.getElementById("seed").value);
       data.append("pseudo_dms", document.getElementById("pseudoDms").value);
       data.append("top_k", document.getElementById("topK").value);
+      data.append("max_alternatives", document.getElementById("maxAlternatives").value);
       data.append("cost_criteria", document.getElementById("costCriteria").value);
       return data;
     }

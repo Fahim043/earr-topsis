@@ -86,6 +86,20 @@ COST_KEYWORDS = {
     "pollution",
 }
 
+DESCRIPTOR_COLUMNS = {
+    "code",
+    "id",
+    "index",
+    "year",
+    "symbol",
+    "region",
+    "regin",
+    "source",
+    "adm",
+    "oca",
+    "sou",
+}
+
 
 def _clean_name(value: Any) -> str:
     text = str(value).strip()
@@ -151,6 +165,13 @@ def _read_xlsx_rows(path: Path) -> list[dict[str, Any]]:
     rows = list(sheet.iter_rows(values_only=True))
     if not rows:
         return []
+    header_index = 0
+    for idx, row in enumerate(rows[:25]):
+        non_empty = [cell for cell in row if cell not in (None, "")]
+        if len(non_empty) >= 2:
+            header_index = idx
+            break
+    rows = rows[header_index:]
     headers = [_normalize_header(v) for v in rows[0]]
     return _canonicalize_rows([
         {headers[i]: row[i] for i in range(len(headers))}
@@ -231,6 +252,14 @@ def _infer_cost_criteria(criteria: list[str], requested: set[str]) -> set[str]:
     return inferred
 
 
+def _row_label(row: dict[str, Any], alt_col: str) -> str:
+    if "city" in row and "year" in row and row.get("city") not in (None, "") and row.get("year") not in (None, ""):
+        return f"{_clean_name(row['city'])}_{_clean_name(row['year'])}"
+    if "country" in row and row.get("country") not in (None, ""):
+        return _clean_name(row["country"])
+    return _clean_name(row[alt_col])
+
+
 def _crisp_rows_to_dataset(
     rows: list[dict[str, Any]],
     pseudo_dms: int = 15,
@@ -249,7 +278,10 @@ def _crisp_rows_to_dataset(
     alt_col = alt_col or headers[0]
     criteria = [
         h for h in headers
-        if h != alt_col and sum(_maybe_float(row.get(h)) is not None for row in rows) >= max(2, int(0.75 * len(rows)))
+        if h != alt_col
+        and h not in DESCRIPTOR_COLUMNS
+        and sum(_maybe_float(row.get(h)) is not None for row in rows) >= max(2, int(0.75 * len(rows)))
+        and len({row.get(h) for row in rows if _maybe_float(row.get(h)) is not None}) > 1
     ]
     if not criteria:
         raise ValueError("Crisp table must contain at least one numeric criterion column")
@@ -257,20 +289,23 @@ def _crisp_rows_to_dataset(
         raise ValueError("pseudo_dms must be between 1 and 200")
 
     cost_set = _infer_cost_criteria(criteria, cost_criteria or set())
-    alternatives = [_clean_name(row[alt_col]) for row in rows]
+    alternatives = [_row_label(row, alt_col) for row in rows]
     values = {
-        crit: [_as_float(row[crit], crit) for row in rows]
+        crit: [_maybe_float(row.get(crit)) for row in rows]
         for crit in criteria
     }
     scaled = {}
     for crit, vals in values.items():
-        lo, hi = min(vals), max(vals)
+        finite_vals = [v for v in vals if v is not None]
+        if not finite_vals:
+            continue
+        lo, hi = min(finite_vals), max(finite_vals)
         if abs(hi - lo) < 1e-12:
             scaled[crit] = [5.0 for _ in vals]
         elif crit in cost_set:
-            scaled[crit] = [1.0 + 8.0 * (hi - v) / (hi - lo) for v in vals]
+            scaled[crit] = [5.0 if v is None else 1.0 + 8.0 * (hi - v) / (hi - lo) for v in vals]
         else:
-            scaled[crit] = [1.0 + 8.0 * (v - lo) / (hi - lo) for v in vals]
+            scaled[crit] = [5.0 if v is None else 1.0 + 8.0 * (v - lo) / (hi - lo) for v in vals]
 
     decision_makers = [f"DM{i + 1}" for i in range(pseudo_dms)]
     ratings = {
@@ -295,6 +330,76 @@ def _crisp_rows_to_dataset(
             "source": "crisp_matrix",
             "pseudo_decision_makers": pseudo_dms,
             "cost_criteria_scaled_as_benefit": sorted(cost_set),
+        },
+    }
+
+
+def _parse_s_value(value: Any) -> list[float] | None:
+    if not isinstance(value, str) or not value.strip().startswith("[s"):
+        return None
+    nums = []
+    for part in value.strip("[]").split(","):
+        part = part.strip()
+        if part.startswith("s"):
+            nums.append(float(part[1:]))
+    if not nums:
+        return None
+    lo, hi = min(nums), max(nums)
+    mid = sum(nums) / len(nums)
+    def scale(x: float) -> float:
+        return 1.0 + (8.0 * x / 6.0)
+    return [round(scale(lo), 4), round(scale(mid), 4), round(scale(hi), 4)]
+
+
+def _supplier_workbook_to_dataset(path: Path) -> dict:
+    workbook = openpyxl.load_workbook(path, data_only=True)
+    if "Julgamentos DMs" not in workbook.sheetnames:
+        raise ValueError("Not a recognized hesitant fuzzy supplier workbook")
+    ws = workbook["Julgamentos DMs"]
+    ratings: dict[str, dict[str, dict[str, list[float]]]] = {}
+    alternatives: list[str] = []
+    criteria: list[str] = []
+
+    row = 1
+    while row <= ws.max_row:
+        dm = ws.cell(row, 8).value
+        if isinstance(dm, str) and dm.startswith("DM"):
+            dm_id = dm.strip()
+            block_criteria = [
+                str(ws.cell(row, col).value).replace("Neg ", "").strip()
+                for col in range(9, 13)
+                if ws.cell(row, col).value
+            ]
+            if not criteria:
+                criteria = block_criteria
+            ratings[dm_id] = {}
+            rr = row + 1
+            while rr <= ws.max_row and ws.cell(rr, 8).value:
+                alt = str(ws.cell(rr, 8).value).strip()
+                if alt.startswith("A"):
+                    if alt not in alternatives:
+                        alternatives.append(alt)
+                    ratings[dm_id][alt] = {}
+                    for idx, crit in enumerate(block_criteria, start=9):
+                        parsed = _parse_s_value(ws.cell(rr, idx).value)
+                        if parsed is not None:
+                            ratings[dm_id][alt][crit] = parsed
+                rr += 1
+            row = rr
+        row += 1
+
+    if not alternatives or not criteria or not ratings:
+        raise ValueError("Could not extract decision-maker blocks from hesitant fuzzy workbook")
+
+    return {
+        "alternatives": alternatives,
+        "criteria": criteria,
+        "decision_makers": sorted(ratings),
+        "criteria_weights": {crit: [1.0, 1.0, 1.0] for crit in criteria},
+        "ratings": ratings,
+        "conversion": {
+            "source": "hesitant_fuzzy_supplier_workbook",
+            "sheet": "Julgamentos DMs",
         },
     }
 
@@ -344,6 +449,24 @@ def _validate_native_dataset(data: dict) -> dict:
     return clean
 
 
+def _limit_alternatives(data: dict, max_alternatives: int) -> dict:
+    if max_alternatives <= 0 or len(data["alternatives"]) <= max_alternatives:
+        return data
+    kept = data["alternatives"][:max_alternatives]
+    kept_set = set(kept)
+    limited = dict(data)
+    limited["alternatives"] = kept
+    limited["ratings"] = {
+        dm: {alt: ratings[alt] for alt in kept if alt in ratings}
+        for dm, ratings in data["ratings"].items()
+    }
+    conversion = dict(data.get("conversion") or {})
+    conversion["limited_from_alternatives"] = len(data["alternatives"])
+    conversion["limited_to_alternatives"] = len(kept_set)
+    limited["conversion"] = conversion
+    return limited
+
+
 def parse_upload(path: Path, pseudo_dms: int = 15, cost_criteria: set[str] | None = None) -> dict:
     suffix = path.suffix.lower()
     if suffix == ".json":
@@ -354,10 +477,13 @@ def parse_upload(path: Path, pseudo_dms: int = 15, cost_criteria: set[str] | Non
             raise ValueError("Uploaded table is empty")
         data = _flat_rows_to_dataset(rows) if "decision_maker" in rows[0] else _crisp_rows_to_dataset(rows, pseudo_dms, cost_criteria)
     elif suffix in {".xlsx", ".xlsm"}:
-        rows = _read_xlsx_rows(path)
-        if not rows:
-            raise ValueError("Uploaded workbook is empty")
-        data = _flat_rows_to_dataset(rows) if "decision_maker" in rows[0] else _crisp_rows_to_dataset(rows, pseudo_dms, cost_criteria)
+        try:
+            data = _supplier_workbook_to_dataset(path)
+        except ValueError:
+            rows = _read_xlsx_rows(path)
+            if not rows:
+                raise ValueError("Uploaded workbook is empty")
+            data = _flat_rows_to_dataset(rows) if "decision_maker" in rows[0] else _crisp_rows_to_dataset(rows, pseudo_dms, cost_criteria)
     else:
         raise ValueError("Supported formats: JSON, CSV, TSV, XLSX, XLSM")
 
@@ -451,6 +577,7 @@ async def run_api(
     pseudo_dms: int = Form(15),
     cost_criteria: str = Form(""),
     top_k: int = Form(50),
+    max_alternatives: int = Form(300),
 ) -> dict:
     selected = [m.strip().upper() for m in methods.split(",") if m.strip()]
     invalid = [m for m in selected if m not in METHODS]
@@ -468,6 +595,7 @@ async def run_api(
         upload_path.write_bytes(await file.read())
         try:
             data = parse_upload(upload_path, pseudo_dms=pseudo_dms, cost_criteria=cost_set)
+            data = _limit_alternatives(data, max_alternatives)
             dataset_path = Path(tmp) / "dataset.json"
             dataset_path.write_text(json.dumps(data, ensure_ascii=False), encoding="utf-8")
             results = {
@@ -486,6 +614,7 @@ async def run_api(
             "num_bags": num_bags,
             "seed": seed,
             "top_k": top_k,
+            "max_alternatives": max_alternatives,
             "criteria_types": data.get("criteria_types", {}),
             "conversion": data.get("conversion"),
         },
@@ -498,6 +627,7 @@ async def validate_api(
     file: UploadFile = File(...),
     pseudo_dms: int = Form(15),
     cost_criteria: str = Form(""),
+    max_alternatives: int = Form(300),
 ) -> dict:
     suffix = Path(file.filename or "upload.json").suffix or ".json"
     cost_set = {c.strip() for c in cost_criteria.split(",") if c.strip()}
@@ -506,6 +636,7 @@ async def validate_api(
         upload_path.write_bytes(await file.read())
         try:
             data = parse_upload(upload_path, pseudo_dms=pseudo_dms, cost_criteria=cost_set)
+            data = _limit_alternatives(data, max_alternatives)
         except Exception as exc:
             raise HTTPException(status_code=400, detail=str(exc)) from exc
 

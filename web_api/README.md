@@ -48,6 +48,7 @@ http://127.0.0.1:8000
 | `pseudo_dms` | no | `15` | Pseudo decision makers for crisp uploads |
 | `cost_criteria` | no | empty | Comma-separated cost criteria for crisp uploads |
 | `top_k` | no | `50` | Ranking rows returned per method |
+| `max_alternatives` | no | `300` | Limit alternatives for large workbooks; `0` means no limit |
 
 Example:
 
@@ -110,6 +111,14 @@ Optional columns:
 ### Crisp matrix
 
 The first text column is interpreted as the alternative identifier. Numeric columns are converted to criteria. The backend creates deterministic pseudo decision makers for demonstration, and listed cost criteria are scaled in the reverse direction before conversion to fuzzy ratings.
+
+For healthcare allocation style files with `city` and `year` columns, the backend creates alternatives such as `北京市_2008` so repeated city names do not collide. Missing numeric cells are treated as neutral mid-scale values during demo conversion.
+
+### Supplier hesitant-fuzzy workbook
+
+The API recognizes the supplier-selection workbooks used in the thesis when an Excel file contains the `Julgamentos DMs` sheet. It extracts decision-maker blocks and parses hesitant linguistic values such as `[s4]` or `[s3,s4]` into triangular fuzzy numbers.
+
+Files that contain only labels or lookup information, such as `country_names.xlsx`, are rejected because TOPSIS needs numeric criteria or fuzzy ratings.
 
 ## Deployment
 

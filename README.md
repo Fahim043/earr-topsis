@@ -128,6 +128,14 @@ For crisp uploads, list cost criteria in the UI or form field:
 cost,price,risk,delay
 ```
 
+Large crisp workbooks can be limited with the `max_alternatives` form field. The UI defaults to 300 alternatives so a public demo does not accidentally run a very large workbook with hundreds of bags.
+
+### 4. Supplier hesitant-fuzzy Excel workbooks
+
+The backend also recognizes the supplier-selection Excel workbooks used in the thesis experiments when they contain a `Julgamentos DMs` sheet. It extracts the decision-maker blocks and parses hesitant linguistic values such as `[s4]` or `[s3,s4]` into triangular fuzzy numbers.
+
+Lookup-only spreadsheets such as `country_names.xlsx` are intentionally rejected because they do not contain numeric criteria or fuzzy ratings to rank.
+
 ## GitHub Pages
 
 1. Push this repository to GitHub.
