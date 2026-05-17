@@ -1,0 +1,54 @@
+digraph M7 {
+  graph [
+    rankdir=LR,
+    bgcolor="transparent",
+    pad="0.35",
+    nodesep="0.55",
+    ranksep="0.65"
+  ];
+  node [
+    shape=rect,
+    style="rounded,filled",
+    color="#42f7ff",
+    fillcolor="#0b1322",
+    fontname="Helvetica",
+    fontcolor="#ecf7ff",
+    penwidth=1.4,
+    margin="0.14,0.10"
+  ];
+  edge [
+    color="#ff4fd8",
+    fontname="Helvetica",
+    fontcolor="#ecf7ff",
+    arrowsize=0.75,
+    penwidth=1.4
+  ];
+
+  input [label="Fuzzy group\nratings"];
+  flatten [label="Flatten each\nDM tensor"];
+  entropy [label="Entropy\nreliability"];
+  variance [label="Variance-consistency\nreliability"];
+  clone [label="Clone/agreement\nreliability"];
+  composite [label="Composite reliability\n0.35H + 0.35V + 0.30C"];
+  gap [label="Conservative\ngap filter"];
+  sample [label="Reliability-weighted\nbootstrap sampling"];
+  aggregate [label="Reliability-weighted\nTFN aggregation"];
+  topsis [label="Fuzzy TOPSIS\nper bag"];
+  bag [label="Bag-quality\nsoftmax weighting"];
+  output [label="Final ranking\nand diagnostics"];
+
+  input -> flatten;
+  flatten -> entropy;
+  flatten -> variance;
+  flatten -> clone;
+  entropy -> composite;
+  variance -> composite;
+  clone -> composite;
+  composite -> gap;
+  gap -> sample;
+  gap -> aggregate;
+  sample -> aggregate;
+  aggregate -> topsis;
+  topsis -> bag;
+  bag -> output;
+}

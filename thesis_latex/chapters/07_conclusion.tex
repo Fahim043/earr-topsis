@@ -1,0 +1,9 @@
+\chapter{Conclusion}
+
+This thesis studied bias-resistant fuzzy TOPSIS group decision-making under coordinated decision-maker contamination. The results show that standard fuzzy TOPSIS and plain bootstrap bagging are vulnerable to targeted manipulation. Reliability-aware methods substantially improve robustness when biased decision makers leave statistically distinguishable rating patterns.
+
+The final recommended proposed methods are M4, M6, and M7. M4 uses reliability-weighted bagging, M6 uses reliability-weighted aggregation, and M7 uses entropy-aware multi-signal reliability with weighted ensemble aggregation. In the main attack-fraction experiments, M4 and M6 preserved the clean target rank through 40\% effective contamination, while M7 preserved the clean target rank across all tested structured contamination levels up to 60\%.
+
+External comparator baselines strengthen the contribution. Median aggregation, trimmed-mean aggregation, MAD-consensus filtering, individual-Borda aggregation, and Huang--Li group-ideal TOPSIS aggregation were unable to match M7 under high structured contamination. Statistical summaries and runtime analysis further support the feasibility and robustness of the approach.
+
+The main limitation is adaptive human-mimic manipulation. The method should be claimed as robust against structured, distinguishable coordinated attacks, not as a universal detector of all bias. Future work may add historical trust scores, supervised reliability learning, interactive consensus feedback, and a public web/API platform for dataset upload and method comparison.

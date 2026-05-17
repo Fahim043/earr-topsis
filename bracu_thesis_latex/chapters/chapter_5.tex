@@ -1,0 +1,58 @@
+\section{Focused Real/Pseudo-Real Benchmark}
+Table~\ref{tab:focused-real} shows the main focused benchmark under structured contamination. The clean target rank is the last rank in each dataset; preserving that rank means the attack was blocked.
+
+\input{tables/focused_real_results}
+
+M1 collapses under contamination. M2 improves over M1 but remains insufficient. M4, M6, and M7 preserve the clean target rank in all three focused larger datasets. M5 is inconsistent.
+
+\section{Attack-Fraction Curves}
+Table~\ref{tab:attack-curve} shows target-rank behavior as the effective attack fraction increases. M4 and M6 remain strong through 40\% effective structured contamination. M7 preserves the clean target rank across all tested structured contamination levels, including 53.3\% and 60.0\%.
+
+\input{tables/attack_fraction_results}
+
+\section{External Comparator Baselines}
+Table~\ref{tab:external-comparators} compares the proposed methods with external comparator baselines. Robust aggregation and consensus filtering work well at low-to-moderate contamination but collapse under high contamination. The Huang--Li group-ideal adaptation is vulnerable because the original model assumes honest decision makers and does not include adversarial reliability detection.
+
+\input{tables/external_comparator_results}
+
+\section{Statistical Summary}
+Table~\ref{tab:method-summary} summarizes blocked cases and target-rank error across 18 attack-fraction scenarios. M7 is the only method with 18/18 blocked cases and zero mean target-rank error under the tested structured attack model.
+
+\input{tables/method_summary}
+
+\section{Pairwise Target-Error Tests}
+M7 had lower target-rank error than M1, M2, EB4, and EB5 in all 18 attack-fraction scenarios. Compared with M3, M4, M6, and EB3, M7 improved the six majority/high-contamination scenarios and tied the remaining twelve. The sign-test and Wilcoxon-style paired comparisons support the improvement of M7 under the structured threat model.
+
+\input{tables/pairwise_tests}
+
+\section{Runtime and Scalability}
+Table~\ref{tab:runtime} reports representative runtime at the 30\% contaminated setting with 200 bags. M7 is slower than M1 but comparable to the other ensemble methods and practical for offline decision-support use.
+
+\input{tables/runtime_results}
+
+\section{Hand-Computed Validation}
+A small hand-computed fuzzy TOPSIS example was used as a smoke test. The expected closeness coefficients are \(CC(A_1)=0.52941176\) and \(CC(A_2)=0.47058824\), which match the implementation output.
+
+\section{Result Interpretation by Research Question}
+
+The results answer the research questions as follows.
+
+\textbf{RQ1: Is classical fuzzy TOPSIS vulnerable?} Yes. M1 repeatedly moves the attacked target upward, often to rank 1. This confirms that standard fuzzy TOPSIS is not reliable under coordinated contamination.
+
+\textbf{RQ2: Does bootstrap bagging alone solve the problem?} No. M2 improves over M1 in some cases but never fully blocks the structured target attack across the attack-fraction scenarios. Bagging reduces variance, but it does not identify biased decision makers.
+
+\textbf{RQ3: Does reliability-weighted sampling help?} Yes. M4 preserves the clean target rank through 40\% effective contamination in the main attack-fraction experiments.
+
+\textbf{RQ4: Does reliability-weighted aggregation help?} Yes. M6 also preserves the clean target rank through 40\% effective contamination and is easier to interpret than M7.
+
+\textbf{RQ5: Does multi-signal reliability help under high contamination?} Yes. M7 is the only method that preserves the clean target rank in all 18 structured attack-fraction scenarios.
+
+\textbf{RQ6: Are external comparator baselines enough?} The external baselines are useful but not enough under high contamination. Median, trimmed mean, and MAD-consensus methods can resist low or moderate contamination, but they collapse when the contaminated group shifts the center. The Huang--Li group-ideal adaptation is important prior art, but it assumes honest decision makers and is vulnerable under adversarial contamination.
+
+\section{Frozen Result Decision}
+
+The result tables in this chapter are frozen for the thesis report. The selected interpretation is:
+
+\begin{quote}
+M4, M6, and M7 are the three proposed methods. M2 is the corrected bootstrap baseline, and M5 is a cluster-stratified ablation branch. M7 is the strongest final method under the tested structured threat model.
+\end{quote}

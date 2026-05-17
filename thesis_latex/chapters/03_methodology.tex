@@ -1,0 +1,161 @@
+\chapter{Methodology}
+
+\section{Shared Notation}
+Let \(A_i\), \(i=1,\ldots,n\), denote alternatives; \(C_j\), \(j=1,\ldots,m\), denote criteria; and \(D_k\), \(k=1,\ldots,K\), denote decision makers. The fuzzy rating supplied by decision maker \(D_k\) for alternative \(A_i\) on criterion \(C_j\) is a triangular fuzzy number:
+\[
+\tilde{x}_{ijk}=(l_{ijk},m_{ijk},u_{ijk}).
+\]
+The fuzzy criterion weight for criterion \(C_j\) is:
+\[
+\tilde{w}_j=(l_j^w,m_j^w,u_j^w).
+\]
+
+The vertex distance between two triangular fuzzy numbers \(\tilde{a}\) and \(\tilde{b}\) is:
+\[
+d(\tilde{a},\tilde{b}) =
+\sqrt{
+\frac{(a_l-b_l)^2+(a_m-b_m)^2+(a_u-b_u)^2}{3}
+}.
+\]
+
+The TOPSIS closeness coefficient for alternative \(A_i\) is:
+\[
+CC_i = \frac{D_i^-}{D_i^+ + D_i^-},
+\]
+where \(D_i^+\) and \(D_i^-\) are the distances to the fuzzy positive and negative ideal solutions. Higher \(CC_i\) indicates a better rank.
+
+\section{M1: Classical Fuzzy TOPSIS}
+M1 is the baseline. It aggregates the full decision-maker panel by:
+\[
+\tilde{x}_{ij} =
+\left(
+\min_k l_{ijk},
+\frac{1}{K}\sum_{k=1}^{K} m_{ijk},
+\max_k u_{ijk}
+\right).
+\]
+
+For benefit criteria, the normalized fuzzy rating is:
+\[
+\tilde{r}_{ij} =
+\left(
+\frac{l_{ij}}{u_j^+},
+\frac{m_{ij}}{u_j^+},
+\frac{u_{ij}}{u_j^+}
+\right),
+\quad
+u_j^+ = \max_i u_{ij}.
+\]
+
+For cost criteria, the normalized fuzzy rating is:
+\[
+\tilde{r}_{ij} =
+\left(
+\frac{l_j^-}{u_{ij}},
+\frac{l_j^-}{m_{ij}},
+\frac{l_j^-}{l_{ij}}
+\right),
+\quad
+l_j^- = \min_i l_{ij}.
+\]
+
+M1 is interpretable but vulnerable because all decision makers influence the final fuzzy matrix.
+
+\section{M2: Bootstrap Bagged Fuzzy TOPSIS}
+M2 introduces bootstrap sampling over decision makers. For each bag \(b=1,\ldots,B\):
+\[
+S_b = \{D_{b1},\ldots,D_{bK}\}, \quad D_{bt}\sim \text{Uniform}(D_1,\ldots,D_K).
+\]
+Sampling is with replacement. Each bag runs fuzzy TOPSIS, and final rankings are aggregated by Borda voting with average closeness as a tie-breaker. M2 is the corrected ensemble baseline, not a final proposed defense.
+
+\section{M3: Reliability Filtering}
+M3 computes a reliability score from each decision maker's distance to a robust median consensus vector. Each decision maker's complete fuzzy rating tensor is flattened:
+\[
+\mathbf{x}_k \in \mathbb{R}^{3nm}.
+\]
+The consensus center is:
+\[
+\mathbf{c} = \text{median}(\mathbf{x}_1,\ldots,\mathbf{x}_K).
+\]
+Distance and reliability are computed as:
+\[
+d_k=\|\mathbf{x}_k-\mathbf{c}\|_2,
+\quad
+R_k = 1-\frac{d_k}{\max_s d_s}.
+\]
+Low-reliability decision makers are filtered before fuzzy TOPSIS is applied.
+
+\section{M4: Reliability-Weighted Bagging}
+M4 is the first proposed method. It keeps the bootstrap ensemble structure but changes the sampling probability:
+\[
+P(D_k)=\frac{R_k}{\sum_{s=1}^{K}R_s}.
+\]
+Decision makers with higher reliability enter more bags, while suspicious decision makers enter fewer bags. This method preserves the ensemble logic of M2 but adds reliability-awareness.
+
+\section{M5: Cluster-Stratified Bagging}
+M5 clusters decision makers based on their flattened rating vectors and attempts to sample from reliable clusters. It is useful as a design branch because coordinated attackers may form a behavioral cluster. However, the experimental results are inconsistent, so M5 is not selected as a final proposed method.
+
+\section{M6: Reliability-Weighted Aggregation}
+M6 is the second proposed method. Instead of using reliability only during sampling, M6 directly weights decision-maker ratings:
+\[
+\tilde{x}_{ij}^{(R)} =
+\left(
+\frac{\sum_k R_k l_{ijk}}{\sum_k R_k},
+\frac{\sum_k R_k m_{ijk}}{\sum_k R_k},
+\frac{\sum_k R_k u_{ijk}}{\sum_k R_k}
+\right).
+\]
+This means that suspicious decision makers contribute less to the aggregated fuzzy decision matrix even if they are present in a bag.
+
+\section{M7: Entropy-Aware Reliability-Weighted Robust Fuzzy TOPSIS}
+M7 is the final proposed method and is named \methodname. It uses a multi-signal reliability model.
+
+\subsection{Entropy Signal}
+For each decision-maker vector \(\mathbf{x}_k\), a histogram distribution \(p_{kh}\) is formed. Shannon entropy is:
+\[
+H_k = -\sum_h p_{kh}\log(p_{kh}).
+\]
+Low entropy can indicate repeated attack patterns, such as assigning the same extreme rating to many alternatives.
+
+\subsection{Variance-Consistency Signal}
+Let \(\sigma_k^2=\text{Var}(\mathbf{x}_k)\), and let \(\tilde{\sigma}^2\) be the median individual variance. The variance-consistency reliability is:
+\[
+R_k^{(V)} =
+\exp\left(
+-\left|\frac{\sigma_k^2}{\tilde{\sigma}^2}-1\right|
+\right).
+\]
+
+\subsection{Clone/Agreement Signal}
+Pairwise distances are computed between decision-maker vectors. Near-identical decision makers receive a clone penalty:
+\[
+R_k^{(C)} = \exp(-3\cdot clone\_fraction_k).
+\]
+
+\subsection{Composite Reliability}
+The composite reliability is:
+\[
+R_k =
+0.35R_k^{(H)}
++0.35R_k^{(V)}
++0.30R_k^{(C)}.
+\]
+
+\subsection{Final Ensemble}
+M7 uses reliability-weighted sampling, reliability-weighted aggregation inside each bag, and outer-bag quality weighting:
+\[
+W_b = \frac{\exp(q_b/T)}{\sum_{s=1}^{B} \exp(q_s/T)},
+\]
+where \(q_b\) is the mean reliability of bag \(b\), and \(T\) is a temperature parameter calibrated from bag-reliability dispersion. Final closeness is:
+\[
+CC_i^{final} = \sum_{b=1}^{B} W_b CC_i^{(b)}.
+\]
+
+\section{Method Progression}
+The method progression is:
+\[
+\text{M1} \rightarrow \text{M2} \rightarrow \text{M4}, \quad
+\text{M1} \rightarrow \text{M3} \rightarrow \text{M6}, \quad
+\text{M4},\text{M6} \rightarrow \text{M7}.
+\]
+M2 is an ensemble baseline. M4, M6, and M7 are the final proposed methods.

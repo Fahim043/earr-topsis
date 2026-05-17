@@ -1,0 +1,46 @@
+\section{Interpretation of Main Findings}
+
+The results support the main hypothesis under the tested threat model. Classical fuzzy TOPSIS is vulnerable because all decision makers directly influence the aggregated fuzzy matrix. Plain bootstrap bagging improves stability but does not remove biased decision makers from the ensemble. Reliability-aware methods improve robustness because they reduce the influence of suspicious decision makers.
+
+M4 and M6 are strong through 40\% effective structured contamination. This means that when the biased group is still a distinguishable sub-majority, reliability-weighted sampling and reliability-weighted aggregation can preserve the clean target rank. M7 is stronger because it uses multiple reliability signals and remains stable under all tested structured attack fractions, including majority structured contamination.
+
+\section{Why M2 Is Not a Main Proposed Method}
+
+M2 is important because it corrects the bootstrap mechanism and establishes the ensemble baseline. However, it does not estimate decision-maker reliability. The experiments show that M2 improves over M1 but still allows the attack target to move upward in every attack-fraction scenario. Therefore, M2 should be presented as a corrected baseline, not as a final proposed method.
+
+\section{Why M4 Is Proposed}
+
+M4 is the first method that connects bagging with reliability. It keeps the bootstrap idea but changes the probability of selecting each decision maker. Reliable decision makers appear more often, and suspicious decision makers appear less often. This is a simple and explainable improvement over M2.
+
+\section{Why M6 Is Proposed}
+
+M6 is proposed because it uses reliability directly inside fuzzy aggregation. This is important because a biased decision maker may still enter a bag. If aggregation is reliability-weighted, the decision maker's contribution remains small. M6 is mathematically simple and interpretable, which makes it useful for practical adoption.
+
+\section{Why M7 Is the Final Proposed Method}
+
+M7 is the final proposed method because it improves reliability estimation. It does not depend only on distance from a consensus center. Instead, it examines entropy, variance consistency, and clone/agreement patterns. This allows M7 to identify structured coordinated behavior even when the contaminated group becomes large.
+
+\section{Why M5 Is Not Proposed}
+
+M5 is not selected as a main proposed method because its experimental behavior is inconsistent. Clustering is conceptually useful when attackers form a separate group, but clustering can also produce unstable decisions depending on dataset geometry. The thesis therefore discusses M5 as an ablation branch rather than a final method.
+
+\section{Human Bias and Human-Mimic Attacks}
+
+It is important to distinguish ordinary human bias from adaptive human-mimic attacks. Ordinary human bias may be a genuine preference, a subjective judgment, or an expert's different perspective. A robust group-decision method should not automatically remove every decision maker who disagrees.
+
+An adaptive human-mimic attack is different. In that case, malicious decision makers deliberately construct ratings that look statistically similar to honest human variation while still pushing the target upward. M7 is not guaranteed against such attacks. This is a limitation, not a failure of the research. It defines the threat-model boundary.
+
+\section{Practical Implications}
+
+The proposed framework can be used as a decision-support safeguard. It can help analysts compare normal fuzzy TOPSIS rankings with reliability-aware rankings and inspect suspicious decision-maker reliability scores. In practice, the method should support human review rather than replace expert judgment.
+
+\section{Limitations}
+
+The main limitations are:
+
+\begin{itemize}
+    \item Some real datasets are converted into pseudo-real fuzzy group panels rather than collected from native human fuzzy decision-maker panels.
+    \item Adaptive human-mimic attacks remain difficult for unsupervised reliability methods.
+    \item The public API scaffold is functional as a prototype but still needs production deployment, authentication, dataset-size limits, and better user-interface polishing.
+    \item The final journal version may require additional exact reproduction of specific published algorithms if reviewers request them.
+\end{itemize}

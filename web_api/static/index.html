@@ -1,0 +1,1038 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>EARR-TOPSIS Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #06070a;
+      --panel: rgba(10, 14, 24, 0.82);
+      --panel-strong: rgba(13, 20, 34, 0.96);
+      --line: rgba(127, 239, 255, 0.24);
+      --line-strong: rgba(127, 239, 255, 0.54);
+      --text: #ecf7ff;
+      --muted: #91a7b8;
+      --cyan: #42f7ff;
+      --pink: #ff4fd8;
+      --lime: #b8ff4f;
+      --amber: #ffd166;
+      --red: #ff5c7a;
+      --shadow: 0 24px 80px rgba(0, 0, 0, 0.46);
+      --radius: 8px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at 18% 0%, rgba(255, 79, 216, 0.12), transparent 31%),
+        radial-gradient(circle at 82% 8%, rgba(66, 247, 255, 0.11), transparent 33%),
+        linear-gradient(135deg, #06070a 0%, #0b101a 46%, #09080f 100%);
+      color: var(--text);
+      overflow-x: hidden;
+    }
+
+    #scene {
+      position: fixed;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -2;
+      background: #05070b;
+    }
+
+    .scanline {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      background:
+        repeating-linear-gradient(to bottom, rgba(255, 255, 255, 0.035), rgba(255, 255, 255, 0.035) 1px, transparent 1px, transparent 8px);
+      mix-blend-mode: overlay;
+      opacity: 0.25;
+    }
+
+    .shell {
+      width: min(1500px, calc(100% - 32px));
+      margin: 0 auto;
+      padding: 24px 0 40px;
+    }
+
+    .topbar {
+      display: grid;
+      grid-template-columns: 1fr minmax(260px, 520px);
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 18px;
+    }
+
+    .brand {
+      padding: 16px 0 4px;
+    }
+
+    .eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--lime);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .pulse {
+      width: 8px;
+      height: 8px;
+      background: var(--lime);
+      box-shadow: 0 0 18px var(--lime);
+    }
+
+    h1 {
+      margin: 8px 0 8px;
+      font-size: clamp(34px, 5vw, 72px);
+      line-height: 0.95;
+      letter-spacing: 0;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      max-width: 820px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .api-strip {
+      border: 1px solid var(--line);
+      background: rgba(5, 10, 18, 0.74);
+      box-shadow: var(--shadow);
+      padding: 12px;
+      border-radius: var(--radius);
+      backdrop-filter: blur(18px);
+    }
+
+    .api-strip label,
+    .field label,
+    .mini-label {
+      display: block;
+      color: #c8d9e6;
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      margin-bottom: 7px;
+      letter-spacing: 0.06em;
+    }
+
+    .api-row {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 8px;
+    }
+
+    input,
+    button,
+    select {
+      font: inherit;
+    }
+
+    input[type="text"],
+    input[type="number"] {
+      width: 100%;
+      min-width: 0;
+      color: var(--text);
+      background: rgba(2, 6, 12, 0.72);
+      border: 1px solid rgba(145, 167, 184, 0.28);
+      border-radius: var(--radius);
+      padding: 11px 12px;
+      outline: none;
+    }
+
+    input[type="text"]:focus,
+    input[type="number"]:focus {
+      border-color: var(--cyan);
+      box-shadow: 0 0 0 3px rgba(66, 247, 255, 0.12);
+    }
+
+    button {
+      border: 0;
+      border-radius: var(--radius);
+      color: #061017;
+      background: var(--cyan);
+      font-weight: 900;
+      padding: 11px 14px;
+      cursor: pointer;
+      transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+      white-space: nowrap;
+    }
+
+    button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 0 24px rgba(66, 247, 255, 0.34);
+    }
+
+    button.secondary {
+      color: var(--text);
+      background: rgba(255, 255, 255, 0.07);
+      border: 1px solid rgba(255, 255, 255, 0.13);
+    }
+
+    button.pink {
+      background: var(--pink);
+      color: #170213;
+    }
+
+    .health {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 12px;
+      min-height: 18px;
+    }
+
+    .dashboard {
+      display: grid;
+      grid-template-columns: minmax(300px, 430px) 1fr;
+      gap: 18px;
+      align-items: start;
+    }
+
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(18px);
+    }
+
+    .panel-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid rgba(127, 239, 255, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .panel-body {
+      padding: 18px;
+    }
+
+    .dropzone {
+      border: 1px dashed rgba(66, 247, 255, 0.48);
+      background:
+        linear-gradient(135deg, rgba(66, 247, 255, 0.08), transparent 44%),
+        rgba(3, 9, 18, 0.72);
+      border-radius: var(--radius);
+      padding: 18px;
+      min-height: 128px;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 160ms ease, background 160ms ease;
+    }
+
+    .dropzone.dragging {
+      border-color: var(--pink);
+      background: rgba(255, 79, 216, 0.09);
+    }
+
+    .dropzone strong {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text);
+    }
+
+    .dropzone span {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    #file { display: none; }
+
+    .file-chip {
+      margin-top: 10px;
+      display: none;
+      color: var(--lime);
+      font-size: 13px;
+      overflow-wrap: anywhere;
+    }
+
+    .method-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .method-toggle {
+      position: relative;
+    }
+
+    .method-toggle input {
+      position: absolute;
+      opacity: 0;
+      pointer-events: none;
+    }
+
+    .method-toggle span {
+      display: grid;
+      gap: 3px;
+      min-height: 70px;
+      border: 1px solid rgba(145, 167, 184, 0.24);
+      border-radius: var(--radius);
+      padding: 10px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.04);
+      cursor: pointer;
+    }
+
+    .method-toggle b {
+      color: var(--text);
+      font-size: 16px;
+    }
+
+    .method-toggle small {
+      line-height: 1.25;
+      font-size: 11px;
+    }
+
+    .method-toggle input:checked + span {
+      border-color: var(--cyan);
+      color: #d9fbff;
+      background: rgba(66, 247, 255, 0.10);
+      box-shadow: inset 0 0 24px rgba(66, 247, 255, 0.05);
+    }
+
+    .fields {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    .action-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .format-list {
+      display: grid;
+      gap: 8px;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .format-list code {
+      color: var(--lime);
+      background: rgba(184, 255, 79, 0.08);
+      border: 1px solid rgba(184, 255, 79, 0.18);
+      padding: 2px 5px;
+      border-radius: 4px;
+    }
+
+    .status {
+      min-height: 34px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.45;
+    }
+
+    .summary-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .metric {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: var(--radius);
+      padding: 12px;
+      min-width: 0;
+    }
+
+    .metric span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin-bottom: 5px;
+    }
+
+    .metric b {
+      color: var(--text);
+      font-size: 22px;
+      overflow-wrap: anywhere;
+    }
+
+    .result-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(240px, 1fr));
+      gap: 12px;
+    }
+
+    .method-card {
+      border: 1px solid rgba(127, 239, 255, 0.20);
+      background: rgba(6, 11, 20, 0.76);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .method-card h3 {
+      margin: 0;
+      padding: 13px 14px;
+      border-bottom: 1px solid rgba(127, 239, 255, 0.14);
+      font-size: 14px;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .method-card h3 span {
+      color: var(--amber);
+      font-size: 12px;
+      text-transform: none;
+      letter-spacing: 0;
+      text-align: right;
+    }
+
+    .method-content {
+      padding: 14px;
+    }
+
+    .bar-list {
+      display: grid;
+      gap: 8px;
+    }
+
+    .rank-row {
+      display: grid;
+      grid-template-columns: 28px minmax(0, 1fr) 58px;
+      gap: 8px;
+      align-items: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .rank-name {
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text);
+    }
+
+    .bar-track {
+      grid-column: 2 / 4;
+      height: 6px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--cyan), var(--pink), var(--lime));
+      transition: width 600ms ease;
+    }
+
+    details {
+      margin-top: 12px;
+      border-top: 1px solid rgba(255, 255, 255, 0.09);
+      padding-top: 10px;
+    }
+
+    summary {
+      cursor: pointer;
+      color: var(--cyan);
+      font-size: 12px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    pre {
+      margin: 10px 0 0;
+      max-height: 340px;
+      overflow: auto;
+      background: rgba(0, 0, 0, 0.42);
+      border: 1px solid rgba(255, 255, 255, 0.10);
+      border-radius: var(--radius);
+      padding: 12px;
+      color: #d6e7f3;
+      font-size: 12px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+    }
+
+    .empty-state {
+      display: grid;
+      place-items: center;
+      min-height: 360px;
+      text-align: center;
+      color: var(--muted);
+      border: 1px dashed rgba(255, 255, 255, 0.13);
+      border-radius: var(--radius);
+      background: rgba(0, 0, 0, 0.18);
+      padding: 24px;
+    }
+
+    .empty-state b {
+      display: block;
+      color: var(--text);
+      margin-bottom: 8px;
+      font-size: 18px;
+    }
+
+    .toast {
+      position: fixed;
+      right: 20px;
+      bottom: 20px;
+      width: min(420px, calc(100% - 40px));
+      border: 1px solid rgba(255, 92, 122, 0.44);
+      background: rgba(31, 6, 14, 0.94);
+      color: #ffdfe6;
+      padding: 14px 16px;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      display: none;
+      z-index: 5;
+      overflow-wrap: anywhere;
+    }
+
+    .toast.show { display: block; }
+
+    @media (max-width: 1080px) {
+      .topbar,
+      .dashboard {
+        grid-template-columns: 1fr;
+      }
+      .result-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 660px) {
+      .shell {
+        width: min(100% - 20px, 1500px);
+        padding-top: 12px;
+      }
+      .summary-grid,
+      .fields,
+      .method-grid {
+        grid-template-columns: 1fr;
+      }
+      .api-row {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 36px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <canvas id="scene" aria-hidden="true"></canvas>
+  <div class="scanline" aria-hidden="true"></div>
+
+  <div class="shell">
+    <div class="topbar">
+      <header class="brand">
+        <div class="eyebrow"><span class="pulse"></span> Bias-resistant fuzzy TOPSIS lab</div>
+        <h1>EARR-TOPSIS</h1>
+        <p class="subtitle">Upload a native fuzzy TOPSIS dataset, a flat fuzzy table, or a crisp criteria matrix. Run the three proposed methods separately and inspect rankings, reliability scores, and runtime.</p>
+      </header>
+
+      <section class="api-strip" aria-label="API connection">
+        <label for="apiBase">API endpoint</label>
+        <div class="api-row">
+          <input id="apiBase" type="text" spellcheck="false">
+          <button id="healthBtn" type="button" class="secondary">Check</button>
+        </div>
+        <div id="health" class="health">Waiting for API check.</div>
+      </section>
+    </div>
+
+    <main class="dashboard">
+      <section class="panel" aria-label="Dataset controls">
+        <div class="panel-header">
+          <h2 class="panel-title">Dataset Upload</h2>
+          <span class="mini-label">M4 / M6 / M7</span>
+        </div>
+        <div class="panel-body">
+          <form id="runForm">
+            <label class="dropzone" id="dropzone" for="file">
+              <input id="file" name="file" type="file" accept=".json,.csv,.tsv,.xlsx,.xlsm">
+              <span>
+                <strong>Drop dataset here or click to browse</strong>
+                Native JSON, flat fuzzy CSV/XLSX, crisp CSV/XLSX matrix
+              </span>
+            </label>
+            <div id="fileChip" class="file-chip"></div>
+
+            <div class="field full" style="margin-top:16px">
+              <span class="mini-label">Methods</span>
+              <div class="method-grid">
+                <label class="method-toggle">
+                  <input type="checkbox" name="method" value="M4" checked>
+                  <span><b>M4</b><small>Reliability-weighted bagging</small></span>
+                </label>
+                <label class="method-toggle">
+                  <input type="checkbox" name="method" value="M6" checked>
+                  <span><b>M6</b><small>Reliability-weighted aggregation</small></span>
+                </label>
+                <label class="method-toggle">
+                  <input type="checkbox" name="method" value="M7" checked>
+                  <span><b>M7</b><small>Entropy-aware EARR-TOPSIS</small></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="fields">
+              <div class="field">
+                <label for="numBags">Bags</label>
+                <input id="numBags" name="num_bags" type="number" min="1" max="2000" value="100">
+              </div>
+              <div class="field">
+                <label for="seed">Seed</label>
+                <input id="seed" name="seed" type="number" value="42">
+              </div>
+              <div class="field">
+                <label for="pseudoDms">Pseudo DMs</label>
+                <input id="pseudoDms" name="pseudo_dms" type="number" min="1" max="200" value="15">
+              </div>
+              <div class="field">
+                <label for="topK">Rows shown</label>
+                <input id="topK" name="top_k" type="number" min="1" max="1000" value="25">
+              </div>
+              <div class="field full">
+                <label for="costCriteria">Cost criteria for crisp uploads</label>
+                <input id="costCriteria" name="cost_criteria" type="text" placeholder="Example: cost, price, delay">
+              </div>
+            </div>
+
+            <div class="action-row">
+              <button type="submit" class="pink">Run Selected Methods</button>
+              <button id="nativeExample" type="button" class="secondary">Load Native Example</button>
+              <button id="crispExample" type="button" class="secondary">Load Crisp Example</button>
+            </div>
+          </form>
+
+          <div class="format-list">
+            <div><code>Native JSON</code> alternatives, criteria, decision_makers, ratings, optional criteria_types.</div>
+            <div><code>Flat fuzzy</code> one row per DM, alternative, criterion, l, m, u.</div>
+            <div><code>Crisp matrix</code> first text column as alternatives; numeric columns become criteria.</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel" aria-label="Results">
+        <div class="panel-header">
+          <h2 class="panel-title">Method Output</h2>
+          <button id="downloadBtn" type="button" class="secondary">Download JSON</button>
+        </div>
+        <div class="panel-body">
+          <div id="status" class="status">Upload a dataset or load an example, then run M4, M6, and M7.</div>
+          <div id="summary" class="summary-grid" hidden></div>
+          <div id="results" class="empty-state">
+            <div>
+              <b>No run yet</b>
+              Results will appear as separate method panels with ranking bars, reliability summaries, and raw JSON.
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="alert"></div>
+
+  <script>
+    const apiBaseInput = document.getElementById("apiBase");
+    const healthBtn = document.getElementById("healthBtn");
+    const health = document.getElementById("health");
+    const form = document.getElementById("runForm");
+    const fileInput = document.getElementById("file");
+    const dropzone = document.getElementById("dropzone");
+    const fileChip = document.getElementById("fileChip");
+    const statusEl = document.getElementById("status");
+    const summaryEl = document.getElementById("summary");
+    const resultsEl = document.getElementById("results");
+    const toast = document.getElementById("toast");
+    const downloadBtn = document.getElementById("downloadBtn");
+
+    let loadedExample = null;
+    let latestResult = null;
+
+    const sameOriginApi = window.location.origin;
+    const needsExternalApi = window.location.protocol === "file:" || window.location.hostname.endsWith("github.io") || (window.location.port && window.location.port !== "8000");
+    const defaultApi = needsExternalApi ? "http://127.0.0.1:8000" : sameOriginApi;
+    apiBaseInput.value = defaultApi;
+
+    function apiBase() {
+      return apiBaseInput.value.replace(/\/+$/, "");
+    }
+
+    function showToast(message) {
+      toast.textContent = message;
+      toast.classList.add("show");
+      window.setTimeout(() => toast.classList.remove("show"), 5200);
+    }
+
+    function setStatus(message) {
+      statusEl.textContent = message;
+    }
+
+    async function checkHealth() {
+      health.textContent = "Checking API...";
+      try {
+        const response = await fetch(`${apiBase()}/health`);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        health.textContent = `${data.service} ${data.version || ""} is online.`;
+      } catch (error) {
+        health.textContent = "API not reachable. Start FastAPI locally or enter your deployed backend URL.";
+      }
+    }
+
+    healthBtn.addEventListener("click", checkHealth);
+    checkHealth();
+
+    ["dragenter", "dragover"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dropzone.classList.add("dragging");
+      });
+    });
+
+    ["dragleave", "drop"].forEach((eventName) => {
+      dropzone.addEventListener(eventName, (event) => {
+        event.preventDefault();
+        dropzone.classList.remove("dragging");
+      });
+    });
+
+    dropzone.addEventListener("drop", (event) => {
+      if (event.dataTransfer.files.length) {
+        fileInput.files = event.dataTransfer.files;
+        loadedExample = null;
+        updateFileChip();
+      }
+    });
+
+    fileInput.addEventListener("change", () => {
+      loadedExample = null;
+      updateFileChip();
+    });
+
+    function updateFileChip() {
+      const file = fileInput.files[0];
+      fileChip.style.display = file ? "block" : "none";
+      fileChip.textContent = file ? `Selected: ${file.name} (${Math.round(file.size / 1024)} KB)` : "";
+    }
+
+    function selectedMethods() {
+      return [...document.querySelectorAll('input[name="method"]:checked')].map((node) => node.value);
+    }
+
+    function methodDescription(method) {
+      return {
+        M4: "Weighted bag sampling",
+        M6: "Weighted fuzzy aggregation",
+        M7: "Entropy-aware reliability ensemble"
+      }[method] || "Method";
+    }
+
+    function buildFormData() {
+      const methods = selectedMethods();
+      if (!methods.length) throw new Error("Select at least one method.");
+
+      const data = new FormData();
+      if (loadedExample) {
+        data.append("file", loadedExample.file, loadedExample.file.name);
+      } else if (fileInput.files[0]) {
+        data.append("file", fileInput.files[0]);
+      } else {
+        throw new Error("Upload a dataset or load an example first.");
+      }
+
+      data.append("methods", methods.join(","));
+      data.append("num_bags", document.getElementById("numBags").value);
+      data.append("seed", document.getElementById("seed").value);
+      data.append("pseudo_dms", document.getElementById("pseudoDms").value);
+      data.append("top_k", document.getElementById("topK").value);
+      data.append("cost_criteria", document.getElementById("costCriteria").value);
+      return data;
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      let payload;
+      try {
+        payload = buildFormData();
+      } catch (error) {
+        showToast(error.message);
+        return;
+      }
+
+      setStatus("Running selected methods. Larger datasets may take a little time.");
+      resultsEl.className = "empty-state";
+      resultsEl.innerHTML = "<div><b>Processing</b> Reliability scores, bootstrap bags, and rankings are being computed.</div>";
+      summaryEl.hidden = true;
+
+      try {
+        const response = await fetch(`${apiBase()}/api/run`, { method: "POST", body: payload });
+        const json = await response.json();
+        if (!response.ok) throw new Error(json.detail || `HTTP ${response.status}`);
+        latestResult = json;
+        renderResults(json);
+      } catch (error) {
+        latestResult = null;
+        resultsEl.className = "empty-state";
+        resultsEl.innerHTML = "<div><b>Run failed</b> Check the dataset format, backend URL, and API logs.</div>";
+        showToast(error.message);
+        setStatus("Run failed.");
+      }
+    });
+
+    document.getElementById("nativeExample").addEventListener("click", () => {
+      const json = {
+        alternatives: ["A1", "A2", "A3"],
+        criteria: ["Quality", "Cost", "Delivery"],
+        decision_makers: ["DM1", "DM2", "DM3", "DM4"],
+        criteria_weights: {
+          Quality: [1, 1, 1],
+          Cost: [1, 1, 1],
+          Delivery: [1, 1, 1]
+        },
+        criteria_types: {
+          Quality: "benefit",
+          Cost: "cost",
+          Delivery: "benefit"
+        },
+        ratings: {
+          DM1: {
+            A1: {Quality: [7, 8, 9], Cost: [3, 4, 5], Delivery: [6, 7, 8]},
+            A2: {Quality: [5, 6, 7], Cost: [2, 3, 4], Delivery: [7, 8, 9]},
+            A3: {Quality: [6, 7, 8], Cost: [4, 5, 6], Delivery: [4, 5, 6]}
+          },
+          DM2: {
+            A1: {Quality: [6, 8, 9], Cost: [3, 4, 6], Delivery: [6, 7, 8]},
+            A2: {Quality: [5, 6, 7], Cost: [2, 3, 4], Delivery: [8, 8, 9]},
+            A3: {Quality: [6, 7, 8], Cost: [4, 5, 7], Delivery: [4, 5, 6]}
+          },
+          DM3: {
+            A1: {Quality: [7, 8, 9], Cost: [4, 5, 6], Delivery: [5, 7, 8]},
+            A2: {Quality: [5, 6, 8], Cost: [2, 3, 5], Delivery: [7, 8, 9]},
+            A3: {Quality: [6, 7, 7], Cost: [4, 5, 6], Delivery: [4, 5, 7]}
+          },
+          DM4: {
+            A1: {Quality: [7, 8, 9], Cost: [3, 4, 5], Delivery: [6, 7, 8]},
+            A2: {Quality: [5, 6, 7], Cost: [2, 3, 4], Delivery: [7, 8, 9]},
+            A3: {Quality: [6, 7, 8], Cost: [4, 5, 6], Delivery: [4, 5, 6]}
+          }
+        }
+      };
+      loadedExample = {
+        file: new File([JSON.stringify(json, null, 2)], "example_native.json", { type: "application/json" })
+      };
+      fileInput.value = "";
+      fileChip.style.display = "block";
+      fileChip.textContent = "Loaded: example_native.json";
+      setStatus("Native fuzzy example loaded.");
+    });
+
+    document.getElementById("crispExample").addEventListener("click", () => {
+      const csv = "alternative,quality,cost,speed,risk\nA1,80,40,70,22\nA2,75,30,80,18\nA3,90,60,60,29\nA4,65,25,85,16\nA5,88,48,72,24\n";
+      loadedExample = {
+        file: new File([csv], "example_crisp.csv", { type: "text/csv" })
+      };
+      document.getElementById("costCriteria").value = "cost,risk";
+      fileInput.value = "";
+      fileChip.style.display = "block";
+      fileChip.textContent = "Loaded: example_crisp.csv";
+      setStatus("Crisp matrix example loaded.");
+    });
+
+    function renderResults(json) {
+      const meta = json.metadata || {};
+      summaryEl.hidden = false;
+      summaryEl.innerHTML = [
+        ["Alternatives", meta.alternatives],
+        ["Criteria", meta.criteria],
+        ["Decision makers", meta.decision_makers],
+        ["Seed", meta.seed]
+      ].map(([label, value]) => `<div class="metric"><span>${label}</span><b>${value ?? "-"}</b></div>`).join("");
+
+      const resultEntries = Object.entries(json.results || {});
+      resultsEl.className = "result-grid";
+      resultsEl.innerHTML = resultEntries.map(([method, result]) => renderMethod(method, result)).join("");
+      setStatus(`Completed ${resultEntries.length} method run(s). Showing top ${meta.top_k || "selected"} ranking rows.`);
+      requestAnimationFrame(() => {
+        document.querySelectorAll(".bar").forEach((bar) => {
+          bar.style.width = bar.dataset.width;
+        });
+      });
+    }
+
+    function renderMethod(method, result) {
+      const ranking = result.ranking || [];
+      const maxScore = Math.max(...ranking.map((row) => Number(row.score) || 0), 1);
+      const bars = ranking.slice(0, 10).map((row) => {
+        const width = Math.max(4, Math.round((Number(row.score) || 0) / maxScore * 100));
+        return `
+          <div class="rank-row">
+            <span>#${row.rank}</span>
+            <span class="rank-name" title="${escapeHtml(row.alternative)}">${escapeHtml(row.alternative)}</span>
+            <span>${Number(row.score).toFixed(4)}</span>
+            <div class="bar-track"><div class="bar" data-width="${width}%"></div></div>
+          </div>`;
+      }).join("");
+
+      const reliability = (result.reliability || []).slice(0, 8).map((row) => {
+        return `${row.decision_maker}: ${Number(row.reliability).toFixed(4)}`;
+      }).join("\n");
+
+      return `
+        <article class="method-card">
+          <h3>${method}<span>${methodDescription(method)}</span></h3>
+          <div class="method-content">
+            <div class="metric" style="margin-bottom:12px">
+              <span>Top alternative</span>
+              <b>${escapeHtml(result.top_alternative || "-")}</b>
+            </div>
+            <div class="bar-list">${bars}</div>
+            <details>
+              <summary>Reliability</summary>
+              <pre>${escapeHtml(reliability || "No reliability output.")}</pre>
+            </details>
+            <details>
+              <summary>Raw JSON</summary>
+              <pre>${escapeHtml(JSON.stringify(result, null, 2))}</pre>
+            </details>
+          </div>
+        </article>`;
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;");
+    }
+
+    downloadBtn.addEventListener("click", () => {
+      if (!latestResult) {
+        showToast("Run a dataset first.");
+        return;
+      }
+      const blob = new Blob([JSON.stringify(latestResult, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = "earr_topsis_result.json";
+      link.click();
+      URL.revokeObjectURL(url);
+    });
+
+    const canvas = document.getElementById("scene");
+    const ctx = canvas.getContext("2d");
+    let width = 0;
+    let height = 0;
+    let tick = 0;
+
+    function resizeCanvas() {
+      const scale = Math.min(window.devicePixelRatio || 1, 2);
+      width = canvas.clientWidth;
+      height = canvas.clientHeight;
+      canvas.width = Math.floor(width * scale);
+      canvas.height = Math.floor(height * scale);
+      ctx.setTransform(scale, 0, 0, scale, 0, 0);
+    }
+
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+
+    function drawScene() {
+      tick += 0.006;
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = "#05070b";
+      ctx.fillRect(0, 0, width, height);
+
+      const horizon = height * 0.42;
+      ctx.lineWidth = 1;
+
+      for (let i = 0; i < 34; i += 1) {
+        const y = horizon + Math.pow(i / 33, 2.2) * height * 0.72;
+        const alpha = 0.05 + i / 33 * 0.25;
+        ctx.strokeStyle = `rgba(66,247,255,${alpha})`;
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(width, y);
+        ctx.stroke();
+      }
+
+      for (let i = -24; i <= 24; i += 1) {
+        const x = width / 2 + i * 52 + Math.sin(tick * 3 + i) * 8;
+        ctx.strokeStyle = i % 2 === 0 ? "rgba(255,79,216,0.18)" : "rgba(184,255,79,0.12)";
+        ctx.beginPath();
+        ctx.moveTo(width / 2, horizon);
+        ctx.lineTo(x, height);
+        ctx.stroke();
+      }
+
+      for (let lane = 0; lane < 7; lane += 1) {
+        const y = (tick * 180 + lane * 93) % (height + 120) - 60;
+        const x0 = (lane / 7) * width + Math.sin(tick * 4 + lane) * 90;
+        const x1 = x0 + 140 + Math.sin(tick * 2 + lane) * 80;
+        ctx.strokeStyle = lane % 2 ? "rgba(255,79,216,0.55)" : "rgba(66,247,255,0.52)";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x0, y);
+        ctx.lineTo(x1, y + 32);
+        ctx.stroke();
+      }
+
+      ctx.lineWidth = 1;
+      ctx.strokeStyle = "rgba(255,209,102,0.25)";
+      for (let i = 0; i < 16; i += 1) {
+        const x = (i * 173 + tick * 240) % (width + 180) - 90;
+        const y = 60 + (i * 47) % Math.max(120, height * 0.42);
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + 72, y);
+        ctx.lineTo(x + 96, y + 22);
+        ctx.stroke();
+      }
+
+      requestAnimationFrame(drawScene);
+    }
+    drawScene();
+  </script>
+</body>
+</html>

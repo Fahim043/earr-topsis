@@ -1,0 +1,43 @@
+\chapter{Experimental Design}
+
+\section{Datasets}
+The evaluation uses synthetic datasets, fuzzy supplier-selection datasets, and real/pseudo-real datasets converted into fuzzy group decision panels. Some source datasets are crisp rather than native fuzzy group-decision datasets. For these datasets, values are normalized to a 1--9 scale and converted into triangular fuzzy ratings with bounded pseudo-decision-maker variation. This conversion is used only to test robustness under controlled contamination and must be reported as pseudo-real group-decision simulation.
+
+The main publication-facing datasets are:
+\begin{itemize}
+    \item Healthcare countries 2021: 26 alternatives and 13 criteria.
+    \item Car evaluation: 300 alternatives and 6 criteria in the focused benchmark.
+    \item Healthcare resource allocation: 300 alternatives and 18 criteria in the focused benchmark.
+\end{itemize}
+
+\section{Attack Model}
+The structured attack selects the clean lowest-ranked alternative as the target. A contaminated subset of decision makers assigns high ratings to the target and low ratings to competing alternatives. This models coordinated target promotion. The requested attacker fractions are 10\%, 20\%, 30\%, 40\%, 50\%, and 60\%, with effective fractions depending on integer decision-maker counts.
+
+\section{Evaluation Metrics}
+The evaluation uses:
+\begin{itemize}
+    \item Spearman rank correlation against the clean M1 reference ranking.
+    \item Kendall rank correlation against the clean M1 reference ranking.
+    \item Top-1 agreement with the clean reference.
+    \item Target rank under contamination.
+    \item Target-rank error, defined as the absolute difference between clean target rank and contaminated target rank.
+\end{itemize}
+
+For targeted manipulation, target-rank error is the most important metric. Global rank correlations can remain high even when the attacked alternative moves sharply upward.
+
+\section{Repeated Runs and Seeds}
+Stochastic methods are evaluated with repeated runs and deterministic seeds. The focused benchmark uses 30 repeats and 200 bags. Deterministic methods are run once where appropriate.
+
+\section{External Comparator Baselines}
+Five external comparator baselines are included:
+
+\begin{itemize}
+    \item EB1 Median TOPSIS: component-wise median aggregation.
+    \item EB2 Trimmed-Mean TOPSIS: component-wise 20\% trimmed mean aggregation.
+    \item EB3 MAD-Consensus TOPSIS: median-vector consensus filtering using MAD/IQR logic.
+    \item EB4 Individual-Borda TOPSIS: individual fuzzy TOPSIS rankings aggregated using Borda voting.
+    \item EB5 Huang--Li Group-Ideal TOPSIS: an adaptation of Huang and Li's group-ideal aggregation model using individual fuzzy TOPSIS closeness coefficients.
+\end{itemize}
+
+\section{Implementation}
+The implementation is written in Python using NumPy and OpenPyXL. The final evidence package includes CSV, Markdown, and LaTeX tables generated from saved benchmark outputs. The method definitions were frozen after the final benchmark run.

@@ -1,0 +1,45 @@
+\chapter{Introduction}
+
+\section{Background}
+Multi-criteria decision-making (MCDM) methods are used when a decision problem involves multiple alternatives, multiple evaluation criteria, and trade-offs among competing objectives. TOPSIS, the Technique for Order Preference by Similarity to Ideal Solution, is one of the most widely used MCDM methods because it ranks alternatives according to their distance from a positive ideal solution and a negative ideal solution \cite{hwang1981}. In many real-world settings, exact numerical ratings are difficult to obtain. Fuzzy TOPSIS extends the classical TOPSIS framework by representing ratings and weights as fuzzy numbers, allowing uncertainty and linguistic judgment to be included in the decision process \cite{chen2000}.
+
+Group decision-making adds another layer of complexity. Instead of a single decision maker, multiple decision makers provide judgments that must be aggregated into a collective decision. Classical fuzzy TOPSIS group-decision workflows usually assume that decision makers provide sincere ratings. In practice, however, decision-maker panels may contain biased, low-quality, or strategically coordinated inputs. If a group of decision makers intentionally pushes one weak alternative upward and suppresses competing alternatives, the final fuzzy TOPSIS ranking can be strongly distorted.
+
+\section{Problem Statement}
+The central problem studied in this thesis is targeted rank manipulation in fuzzy TOPSIS group decision-making. In the threat model considered here, a target alternative is weak under the clean decision-maker panel. A contaminated subset of decision makers then assigns artificially favorable fuzzy ratings to that target and unfavorable ratings to other alternatives. The question is whether classical and ensemble fuzzy TOPSIS methods can preserve the clean ranking under such contamination.
+
+Standard fuzzy TOPSIS aggregates all decision-maker judgments. Therefore, contaminated decision makers directly affect the fuzzy decision matrix. Plain bootstrap bagging can reduce random variation, but if no reliability mechanism is added, biased decision makers still appear in many bootstrap samples. A robust method should identify or reduce the influence of decision makers whose rating behavior is structurally suspicious.
+
+\section{Research Objectives}
+The objectives of this thesis are:
+
+\begin{enumerate}
+    \item To demonstrate that classical fuzzy TOPSIS is vulnerable to coordinated biased decision-maker ratings.
+    \item To develop a progressive set of reliability-aware fuzzy TOPSIS methods for bias-resistant group decision-making.
+    \item To identify which design choices are effective: plain bagging, reliability-weighted sampling, reliability-weighted aggregation, and multi-signal reliability modeling.
+    \item To evaluate the methods using synthetic, real, and pseudo-real benchmark datasets under clean and contaminated conditions.
+    \item To compare the final method against external robust aggregation, consensus filtering, individual-rank aggregation, and group-ideal TOPSIS comparators.
+\end{enumerate}
+
+\section{Research Contributions}
+The main contribution is \methodname{}, an entropy-aware reliability-weighted robust fuzzy TOPSIS framework for group decision-making under coordinated contamination. The thesis presents seven methods, but the final proposed methods are M4, M6, and M7:
+
+\begin{itemize}
+    \item M4 introduces reliability-weighted bagging, where reliable decision makers are sampled more often.
+    \item M6 introduces reliability-weighted fuzzy aggregation, where decision-maker ratings are weighted directly by reliability.
+    \item M7, named \methodname{}, combines entropy, variance consistency, and clone/agreement-pattern signals with reliability-weighted sampling, reliability-weighted aggregation, and bag-quality weighting.
+\end{itemize}
+
+M1 is the classical fuzzy TOPSIS baseline. M2 is the corrected bootstrap bagging baseline. M3 is an intermediate reliability-filtering comparator. M5 is a cluster-stratified branch that is useful for analysis but experimentally inconsistent.
+
+\section{Scope and Claim Boundary}
+This thesis does not claim to detect all human bias. Ordinary disagreement among human decision makers is natural and should not be removed automatically. The claim is narrower:
+
+\begin{quote}
+\methodname{} improves robustness against structured, statistically distinguishable coordinated manipulation in fuzzy TOPSIS group decision-making.
+\end{quote}
+
+Adaptive human-mimic attacks remain a limitation. These are not ordinary human inputs; they are adversarial ratings deliberately designed to look statistically similar to honest decision-maker variation.
+
+\section{Thesis Organization}
+Chapter 2 reviews fuzzy TOPSIS, group decision-making, consensus models, and related TOPSIS aggregation approaches. Chapter 3 presents the full methodology from M1 to M7. Chapter 4 describes the experimental design, datasets, attack model, metrics, and comparator baselines. Chapter 5 reports the results. Chapter 6 discusses interpretation, limitations, and the selected proposed methods. Chapter 7 concludes the thesis and outlines future work.

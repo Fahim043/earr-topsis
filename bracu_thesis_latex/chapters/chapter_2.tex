@@ -1,0 +1,37 @@
+\section{TOPSIS}
+
+TOPSIS was introduced by Hwang and Yoon as an MCDM method based on ideal-solution comparison \cite{hwang1981}. The method assumes that the preferred alternative should have the shortest distance from the positive ideal solution and the longest distance from the negative ideal solution. The positive ideal solution represents the best attainable value for each criterion, while the negative ideal solution represents the worst attainable value.
+
+TOPSIS is popular because it has several practical advantages. It provides a complete ranking, works with many alternatives and criteria, and produces a scalar closeness coefficient that is easy to interpret. However, classical TOPSIS assumes precise numerical ratings and does not directly represent uncertainty in human judgment.
+
+\section{Fuzzy TOPSIS}
+
+Fuzzy TOPSIS extends TOPSIS by representing uncertain evaluations as fuzzy numbers. In this thesis, triangular fuzzy numbers are used because they are simple, interpretable, and widely used. A triangular fuzzy rating \((l,m,u)\) indicates that the decision maker believes the score is at least \(l\), most plausibly \(m\), and at most \(u\).
+
+Chen \cite{chen2000} extended TOPSIS for group decision-making under fuzzy environments. Fuzzy TOPSIS has since been used in supplier selection, service evaluation, technology selection, and many other decision problems. Its strength is that it can represent uncertainty. Its weakness, in the context of this thesis, is that it usually assumes sincere decision-maker input.
+
+\section{Group Decision-Making}
+
+Group decision-making combines judgments from multiple decision makers. This can improve decision quality because different decision makers may hold different expertise. However, aggregation also creates risk. If all decision makers are treated equally, biased or malicious ratings can influence the final group output.
+
+Common aggregation strategies include arithmetic mean, geometric mean, median aggregation, and individual-rank aggregation. Huang and Li \cite{huang2012} argued that simple aggregation of TOPSIS outputs may ignore preference intensity and preference priorities. Their group-ideal TOPSIS aggregation model is important for this thesis because it motivates one of the external comparator baselines.
+
+\section{Consensus Models}
+
+Consensus models measure and manage agreement among decision makers. Liu et al. \cite{liu2022} studied consensus building with fuzzy preference relations, while Tran et al. \cite{tran2024} reviewed consensus models for group decision-making and group recommender systems. These studies show that agreement and disagreement are central themes in group decision-making.
+
+The present thesis uses consensus ideas in a different way. Instead of asking decision makers to revise their judgments, the method estimates reliability from the rating patterns already provided. A decision maker whose ratings are far from robust consensus, unusually repetitive, or clone-like can receive less influence.
+
+\section{Expert Weighting in Fuzzy MAGDM}
+
+Expert weighting is closely related to reliability. Hu et al. \cite{hu2023} proposed a fuzzy multi-attribute group decision-making method based on TOPSIS and optimization models, including expert weighting. Such work supports the idea that not all decision makers should necessarily have equal influence. However, the present thesis focuses specifically on adversarial or biased contamination in triangular fuzzy TOPSIS.
+
+\section{Robust Aggregation and Outlier Filtering}
+
+Robust aggregation methods such as median and trimmed mean are commonly used to reduce the influence of extreme values. Consensus filtering can remove decision makers that are far from a group center. These ideas are used as external comparator baselines in this thesis. However, robust aggregation methods can fail when the contaminated group becomes large enough to shift the center of the data.
+
+\section{Research Gap}
+
+The reviewed literature provides strong foundations for fuzzy TOPSIS, group decision-making, consensus modeling, and expert weighting. However, comparatively less attention has been given to targeted rank manipulation under coordinated biased decision makers. Existing methods often evaluate accuracy, consensus, or satisfaction, but not whether a weak target alternative can be artificially promoted by a coordinated group.
+
+This thesis fills that gap by designing and evaluating reliability-aware fuzzy TOPSIS methods under structured contamination. The key difference from previous work is the explicit bias-resistance evaluation using target-rank error, attack-fraction curves, and external comparator baselines.

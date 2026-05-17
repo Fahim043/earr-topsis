@@ -1,0 +1,21 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+*.log
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.venv/
+venv/
+env/
+
+# Local benchmark scratch files
+_temp*.json
+*.tmp
+
+# Keep final evidence, but do not accidentally commit regenerated bulky scratch outputs.
+outputs/attack_fraction_curves_smoke/
+
+# Local OS/editor files
+.idea/
+.vscode/
