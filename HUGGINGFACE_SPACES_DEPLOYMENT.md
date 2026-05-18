@@ -65,14 +65,14 @@ git push
 8. Open:
 
 ```text
-https://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space
+https://fahim043-earr-topsis.hf.space
 ```
 
 The same URL is both the website and the API backend. For example:
 
 ```text
-https://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space/health
-https://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space/api/run
+https://fahim043-earr-topsis.hf.space/health
+https://fahim043-earr-topsis.hf.space/api/run
 ```
 
 ## Limits To Mention Honestly

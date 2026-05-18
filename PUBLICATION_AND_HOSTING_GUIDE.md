@@ -86,6 +86,12 @@ Repository URL:
 https://github.com/Fahim043/earr-topsis
 ```
 
+Live Space URL:
+
+```text
+https://fahim043-earr-topsis.hf.space
+```
+
 ## Deploy The Live System To Hugging Face
 
 1. Create a Hugging Face account.
@@ -99,10 +105,10 @@ https://github.com/Fahim043/earr-topsis
 earr-topsis
 ```
 
-The final app URL will look like:
+The final app URL is:
 
 ```text
-https://YOUR_USERNAME-earr-topsis.hf.space
+https://fahim043-earr-topsis.hf.space
 ```
 
 Clone the Space repository:
@@ -191,7 +197,7 @@ Code and reproducibility repository:
 https://github.com/Fahim043/earr-topsis
 
 Live demonstration system:
-https://YOUR_USERNAME-earr-topsis.hf.space
+https://fahim043-earr-topsis.hf.space
 ```
 
 Suggested wording:

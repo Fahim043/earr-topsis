@@ -12,6 +12,20 @@ The project studies how fuzzy TOPSIS behaves when some decision makers provide c
 
 The live app is intended to run on **Hugging Face Spaces** because it needs a Python backend. GitHub is used as the public research/code repository.
 
+## Live Demo
+
+Use the hosted CPU demo here:
+
+```text
+https://fahim043-earr-topsis.hf.space
+```
+
+Health check:
+
+```text
+https://fahim043-earr-topsis.hf.space/health
+```
+
 ## Public System Architecture
 
 ```mermaid
