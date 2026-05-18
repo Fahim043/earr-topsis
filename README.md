@@ -14,7 +14,22 @@ The public interface is designed for uploading fuzzy TOPSIS datasets, running M4
 
 ```mermaid
 flowchart LR
-    A["GitHub Pages static UI<br/>docs/index.html"] --> B["FastAPI backend<br/>web_api/app.py"]
+    A["GitHub repository<br/>code, README, diagrams, evidence tables"] --> B["Hugging Face Docker Space<br/>live hosted system"]
+    B --> C["FastAPI backend<br/>web_api/app.py"]
+    C --> D["Animated upload UI<br/>web_api/static/index.html"]
+    C --> E["M4<br/>weighted bagging"]
+    C --> F["M6<br/>weighted aggregation"]
+    C --> G["M7 / EARR-TOPSIS<br/>multi-signal reliability"]
+    E --> H["Ranking + reliability"]
+    F --> H
+    G --> H
+```
+
+Optional static mirror:
+
+```mermaid
+flowchart LR
+    A["GitHub Pages<br/>docs/index.html"] --> B["External API endpoint<br/>Hugging Face Space or local FastAPI"]
     B --> C["M4<br/>weighted bagging"]
     B --> D["M6<br/>weighted aggregation"]
     B --> E["M7 / EARR-TOPSIS<br/>multi-signal reliability"]
@@ -25,7 +40,7 @@ flowchart LR
 
 GitHub Pages can host the animated static UI. It cannot run Python, so the FastAPI backend must be run locally or deployed to a Python host.
 
-For a free CPU-only public demo, the recommended path is **Hugging Face Spaces with Docker**. This can host the animated UI and FastAPI backend together from the same URL. See `HUGGINGFACE_SPACES_DEPLOYMENT.md`.
+For a free CPU-only public demo, the recommended path is **Hugging Face Spaces with Docker**. This can host the animated UI and FastAPI backend together from the same URL. See `PUBLICATION_AND_HOSTING_GUIDE.md` and `HUGGINGFACE_SPACES_DEPLOYMENT.md`.
 
 ## Method Diagrams
 
@@ -58,7 +73,7 @@ Open:
 http://127.0.0.1:8000
 ```
 
-The same UI is also copied to `docs/index.html` for GitHub Pages.
+The same UI is also copied to `docs/index.html` for optional GitHub Pages use, but Hugging Face Spaces is the recommended live demo host because it runs the backend too.
 
 ## API Endpoints
 

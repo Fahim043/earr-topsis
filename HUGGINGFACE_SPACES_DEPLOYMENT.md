@@ -1,6 +1,8 @@
 # Free Backend Deployment With Hugging Face Spaces
 
-GitHub Pages can host the static UI, but it cannot run the Python FastAPI backend. For this project, the clean free option is a **Hugging Face Docker Space** because the algorithm is CPU-only.
+GitHub can host the full repository and README, but GitHub Pages cannot run the Python FastAPI backend. For this project, the clean free option is a **Hugging Face Docker Space** because the algorithm is CPU-only.
+
+If you deploy with Hugging Face Spaces, GitHub Pages is not required. Use GitHub as the public research repository and Hugging Face as the live system.
 
 ## Why This Fits
 

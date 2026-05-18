@@ -1,11 +1,13 @@
 # GitHub and GitHub Pages Deployment
 
-This project has two deployable parts:
+This project has two public parts:
 
-1. **Static GitHub Pages UI**: `docs/index.html`
-2. **Python FastAPI backend**: `web_api/app.py`
+1. **GitHub repository**: full code, diagrams, tables, thesis files, and reproducibility evidence.
+2. **Hugging Face Space**: live Python FastAPI app with the animated UI and backend.
 
-GitHub Pages cannot execute Python. The GitHub Pages site must call a separately running API backend.
+GitHub Pages cannot execute Python. If Hugging Face Spaces is used, GitHub Pages is optional and not needed for the working system.
+
+For the final recommended workflow, see `PUBLICATION_AND_HOSTING_GUIDE.md`.
 
 ## 1. Prepare the Repository
 
@@ -25,7 +27,9 @@ git remote add origin https://github.com/<username>/<repo>.git
 git push -u origin main
 ```
 
-## 2. Enable GitHub Pages
+## 2. Optional: Enable GitHub Pages
+
+Skip this section if you use Hugging Face Spaces for the live app.
 
 1. Open the GitHub repository.
 2. Go to **Settings > Pages**.
@@ -73,7 +77,7 @@ Alternative beginner-friendly option: Render.
    - Build command: `pip install -r requirements.txt`
    - Start command: `uvicorn app:app --host 0.0.0.0 --port $PORT`
 4. After deployment, copy the Render service URL.
-5. Paste that URL into the GitHub Pages UI's **API endpoint** field.
+5. If using the optional GitHub Pages mirror, paste that URL into the UI's **API endpoint** field.
 
 ## 4. Local Test Before Publishing
 
