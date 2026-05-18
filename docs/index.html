@@ -586,10 +586,10 @@
         <div class="panel-body">
           <form id="runForm">
             <label class="dropzone" id="dropzone" for="file">
-              <input id="file" name="file" type="file" accept=".json,.csv,.tsv,.xlsx,.xlsm">
+              <input id="file" name="file" type="file" accept=".json,.csv,.tsv,.xls,.xlsx,.xlsm">
               <span>
                 <strong>Drop dataset here or click to browse</strong>
-                Native JSON, flat fuzzy CSV/XLSX, crisp CSV/XLSX matrix
+                Native JSON, flat fuzzy CSV/TSV/Excel, crisp CSV/TSV/Excel matrix
               </span>
             </label>
             <div id="fileChip" class="file-chip"></div>
@@ -641,8 +641,9 @@
 
             <div class="action-row">
               <button type="submit" class="pink">Run Selected Methods</button>
-              <button id="nativeExample" type="button" class="secondary">Load Native Example</button>
-              <button id="crispExample" type="button" class="secondary">Load Crisp Example</button>
+              <button id="nativeExample" type="button" class="secondary">Run Native Example</button>
+              <button id="crispExample" type="button" class="secondary">Run Crisp Example</button>
+              <button id="stressExample" type="button" class="secondary">Run M7 Stress Example</button>
             </div>
           </form>
 
@@ -695,6 +696,7 @@
     const sameOriginApi = window.location.origin;
     const needsExternalApi = window.location.protocol === "file:" || window.location.hostname.endsWith("github.io") || (window.location.port && window.location.port !== "8000");
     const defaultApi = needsExternalApi ? "http://127.0.0.1:8000" : sameOriginApi;
+    const staticBase = needsExternalApi ? "." : "/static";
     apiBaseInput.value = defaultApi;
 
     function apiBase() {
@@ -794,8 +796,7 @@
       return data;
     }
 
-    form.addEventListener("submit", async (event) => {
-      event.preventDefault();
+    async function runSelectedMethods() {
       let payload;
       try {
         payload = buildFormData();
@@ -822,9 +823,35 @@
         showToast(error.message);
         setStatus("Run failed.");
       }
+    }
+
+    form.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      await runSelectedMethods();
     });
 
-    document.getElementById("nativeExample").addEventListener("click", () => {
+    function setAllMethodsChecked() {
+      document.querySelectorAll('input[name="method"]').forEach((node) => {
+        node.checked = true;
+      });
+    }
+
+    async function loadExampleFile(file, label, options = {}) {
+      loadedExample = { file };
+      fileInput.value = "";
+      fileChip.style.display = "block";
+      fileChip.textContent = `Loaded: ${label}`;
+      if (options.costCriteria !== undefined) document.getElementById("costCriteria").value = options.costCriteria;
+      if (options.numBags !== undefined) document.getElementById("numBags").value = options.numBags;
+      if (options.seed !== undefined) document.getElementById("seed").value = options.seed;
+      if (options.topK !== undefined) document.getElementById("topK").value = options.topK;
+      if (options.maxAlternatives !== undefined) document.getElementById("maxAlternatives").value = options.maxAlternatives;
+      setAllMethodsChecked();
+      setStatus(`${label} loaded. Running selected methods now.`);
+      await runSelectedMethods();
+    }
+
+    document.getElementById("nativeExample").addEventListener("click", async () => {
       const json = {
         alternatives: ["A1", "A2", "A3"],
         criteria: ["Quality", "Cost", "Delivery"],
@@ -862,25 +889,36 @@
           }
         }
       };
-      loadedExample = {
-        file: new File([JSON.stringify(json, null, 2)], "example_native.json", { type: "application/json" })
-      };
-      fileInput.value = "";
-      fileChip.style.display = "block";
-      fileChip.textContent = "Loaded: example_native.json";
-      setStatus("Native fuzzy example loaded.");
+      await loadExampleFile(
+        new File([JSON.stringify(json, null, 2)], "example_native.json", { type: "application/json" }),
+        "example_native.json",
+        { costCriteria: "", numBags: 80, seed: 42, topK: 10, maxAlternatives: 300 }
+      );
     });
 
-    document.getElementById("crispExample").addEventListener("click", () => {
+    document.getElementById("crispExample").addEventListener("click", async () => {
       const csv = "alternative,quality,cost,speed,risk\nA1,80,40,70,22\nA2,75,30,80,18\nA3,90,60,60,29\nA4,65,25,85,16\nA5,88,48,72,24\n";
-      loadedExample = {
-        file: new File([csv], "example_crisp.csv", { type: "text/csv" })
-      };
-      document.getElementById("costCriteria").value = "cost,risk";
-      fileInput.value = "";
-      fileChip.style.display = "block";
-      fileChip.textContent = "Loaded: example_crisp.csv";
-      setStatus("Crisp matrix example loaded.");
+      await loadExampleFile(
+        new File([csv], "example_crisp.csv", { type: "text/csv" }),
+        "example_crisp.csv",
+        { costCriteria: "cost,risk", numBags: 80, seed: 42, topK: 10, maxAlternatives: 300 }
+      );
+    });
+
+    document.getElementById("stressExample").addEventListener("click", async () => {
+      try {
+        setStatus("Loading M7 stress example.");
+        const response = await fetch(`${staticBase}/examples/m7_stress_healthcare_50pct.json`);
+        if (!response.ok) throw new Error(`Could not load stress example: HTTP ${response.status}`);
+        const blob = await response.blob();
+        await loadExampleFile(
+          new File([blob], "m7_stress_healthcare_50pct.json", { type: "application/json" }),
+          "M7 stress example: healthcare 50% structured attack",
+          { costCriteria: "", numBags: 100, seed: 20260425, topK: 8, maxAlternatives: 300 }
+        );
+      } catch (error) {
+        showToast(error.message);
+      }
     });
 
     function renderResults(json) {

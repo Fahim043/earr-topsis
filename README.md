@@ -98,7 +98,7 @@ curl -X POST http://127.0.0.1:8000/api/run \
 }
 ```
 
-### 2. Flat fuzzy CSV/XLSX
+### 2. Flat fuzzy CSV/TSV/Excel
 
 Required columns:
 
@@ -112,7 +112,7 @@ Optional columns:
 weight_l,weight_m,weight_u,criteria_type
 ```
 
-### 3. Crisp CSV/XLSX matrix
+### 3. Crisp CSV/TSV/Excel matrix
 
 The first text column is treated as the alternative name. Numeric columns are treated as criteria. For demonstration, the API converts the crisp matrix into a deterministic pseudo-fuzzy group panel.
 

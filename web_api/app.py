@@ -180,6 +180,33 @@ def _read_xlsx_rows(path: Path) -> list[dict[str, Any]]:
     ])
 
 
+def _read_xls_rows(path: Path) -> list[dict[str, Any]]:
+    try:
+        import xlrd
+    except ImportError as exc:
+        raise ValueError("Legacy .xls upload requires xlrd. Install web_api/requirements.txt.") from exc
+    workbook = xlrd.open_workbook(str(path))
+    sheet = workbook.sheet_by_index(0)
+    rows = []
+    for r in range(sheet.nrows):
+        rows.append(sheet.row_values(r))
+    if not rows:
+        return []
+    header_index = 0
+    for idx, row in enumerate(rows[:25]):
+        non_empty = [cell for cell in row if cell not in (None, "")]
+        if len(non_empty) >= 2:
+            header_index = idx
+            break
+    rows = rows[header_index:]
+    headers = [_normalize_header(v) for v in rows[0]]
+    return _canonicalize_rows([
+        {headers[i]: row[i] for i in range(len(headers))}
+        for row in rows[1:]
+        if any(cell not in (None, "") for cell in row)
+    ])
+
+
 def _read_delimited_rows(path: Path) -> list[dict[str, Any]]:
     delimiter = "\t" if path.suffix.lower() == ".tsv" else ","
     with path.open(newline="", encoding="utf-8-sig") as f:
@@ -484,8 +511,13 @@ def parse_upload(path: Path, pseudo_dms: int = 15, cost_criteria: set[str] | Non
             if not rows:
                 raise ValueError("Uploaded workbook is empty")
             data = _flat_rows_to_dataset(rows) if "decision_maker" in rows[0] else _crisp_rows_to_dataset(rows, pseudo_dms, cost_criteria)
+    elif suffix == ".xls":
+        rows = _read_xls_rows(path)
+        if not rows:
+            raise ValueError("Uploaded workbook is empty")
+        data = _flat_rows_to_dataset(rows) if "decision_maker" in rows[0] else _crisp_rows_to_dataset(rows, pseudo_dms, cost_criteria)
     else:
-        raise ValueError("Supported formats: JSON, CSV, TSV, XLSX, XLSM")
+        raise ValueError("Supported formats: JSON, CSV, TSV, XLS, XLSX, XLSM")
 
     return _validate_native_dataset(data)
 

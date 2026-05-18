@@ -41,7 +41,7 @@ http://127.0.0.1:8000
 
 | Field | Required | Default | Meaning |
 |---|---:|---:|---|
-| `file` | yes | none | JSON, CSV, TSV, XLSX, or XLSM dataset |
+| `file` | yes | none | JSON, CSV, TSV, XLS, XLSX, or XLSM dataset |
 | `methods` | no | `M4,M6,M7` | Comma-separated methods |
 | `num_bags` | no | `100` | Bootstrap bag count |
 | `seed` | no | `42` | Deterministic random seed |
