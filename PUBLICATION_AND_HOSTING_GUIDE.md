@@ -2,51 +2,35 @@
 
 This project has two public surfaces:
 
-1. **GitHub repository**: the complete research/code archive.
-2. **Hugging Face Space**: the live web application with Python backend.
+1. **GitHub repository**: source code, README, method diagrams, and frozen benchmark evidence.
+2. **Hugging Face Space**: live web application with the Python FastAPI backend.
 
-GitHub Pages is optional and no longer required if the Hugging Face Space hosts the UI and backend together.
-
-## Final Recommended Setup
+Final setup:
 
 ```text
 GitHub
-  -> full repository
-  -> README with diagrams, tables, thesis evidence, code map
-  -> source code, LaTeX thesis, final evidence CSV/TEX tables
+  -> public research/code repository
+  -> README with benchmark tables and diagrams
+  -> final evidence CSV/TEX tables
 
 Hugging Face Spaces
   -> live deployed system
   -> animated upload UI
   -> FastAPI backend
-  -> M4, M6, M7 execution
+  -> M4, M6, and M7 execution
 ```
 
-## Why GitHub Alone Is Not Enough
+## GitHub Repository Contents
 
-GitHub can host:
-
-- repository files
-- README pages
-- images and diagrams
-- evidence tables
-- static websites through GitHub Pages
-
-GitHub cannot run a persistent Python FastAPI backend on normal repository hosting or GitHub Pages.
-
-For this project, the backend is required because uploaded files must be parsed and processed by Python. That is why the live system should run on Hugging Face Spaces.
-
-## GitHub Repository Checklist
-
-Keep these files and folders public:
+The public GitHub repository should stay focused. It should contain:
 
 ```text
 README.md
-PUBLICATION_AND_HOSTING_GUIDE.md
-HUGGINGFACE_SPACES_DEPLOYMENT.md
-GITHUB_DEPLOYMENT.md
+LICENSE
 Dockerfile
 .dockerignore
+HUGGINGFACE_SPACES_DEPLOYMENT.md
+PUBLICATION_AND_HOSTING_GUIDE.md
 web_api/
 m1_normal_topsis.py
 m2_bagged_topsis.py
@@ -56,121 +40,95 @@ m5_cluster_stratified.py
 m6_reliability_weighted.py
 m7_entropy_reliability.py
 reliability.py
-run_*.py
 external_baselines.py
+run_real_dataset_benchmarks.py
+run_attack_fraction_curves.py
+run_external_baselines.py
+run_runtime_scalability.py
 compile_final_evidence.py
 diagrams/
-docs/assets/
 outputs/final_evidence/
-bracu_thesis_latex/
 method_architecture_and_proposed_methods.md
 METHOD_EVOLUTION_AND_LIMITATIONS.md
-EARR_TOPSIS_STUDY_GUIDE.md
-THESIS_DEFENSE_STUDY_GUIDE.md
-CODE_FILE_GUIDE.md
+external_baselines_and_related_work.md
+hand_computed_fuzzy_topsis_example.md
+m7_theorems.md
 ```
 
-Be careful before making these public:
+The public repository should not include:
 
 ```text
-papers/
-real_datasets/
-*.pdf
-outputs/pdf_pages_preview*/
+raw real datasets
+downloaded paper PDFs
+personal thesis draft PDFs
+LaTeX dissertation folders
+old preview images
+temporary benchmark JSON dumps
+private notes
 ```
 
-Only publish them if copyright, privacy, and university rules allow it.
+Those files can remain on the local computer, but they should not be tracked in the public repository.
 
-## Step 1: Push Full Repository To GitHub
+## Push The Clean Repository To GitHub
 
 From the project root:
 
 ```bash
 git status
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/earr-topsis.git
-git push -u origin main
-```
-
-If the remote already exists:
-
-```bash
-git remote -v
+git add .
+git commit -m "Clean public repository and README"
 git push
 ```
 
-Your GitHub URL will look like:
+Repository URL:
 
 ```text
-https://github.com/YOUR_USERNAME/earr-topsis
+https://github.com/Fahim043/earr-topsis
 ```
 
-This is the URL to place in the thesis/report as the reproducibility repository.
+## Deploy The Live System To Hugging Face
 
-## Step 2: Confirm README Displays Properly
-
-On GitHub, check:
-
-- diagrams render in the README
-- method descriptions are visible
-- evidence table links work
-- final evidence files are present under `outputs/final_evidence/`
-- API instructions mention Hugging Face Spaces
-- no private or copyrighted file is accidentally exposed
-
-## Step 3: Create Hugging Face Space
-
-1. Create a free Hugging Face account.
-2. Go to **Spaces**.
-3. Click **Create new Space**.
-4. Choose:
+1. Create a Hugging Face account.
+2. Create a new Space.
+3. Choose:
    - SDK: `Docker`
    - Hardware: `CPU Basic`
-   - Visibility: public for demonstration, private while testing
-5. Name it something clear, for example:
+4. Name the Space, for example:
 
 ```text
 earr-topsis
 ```
 
-The final app URL will be:
+The final app URL will look like:
 
 ```text
 https://YOUR_USERNAME-earr-topsis.hf.space
 ```
 
-## Step 4: Push App To Hugging Face
-
-Clone the empty Space repository:
+Clone the Space repository:
 
 ```bash
 git clone https://huggingface.co/spaces/YOUR_USERNAME/earr-topsis
 cd earr-topsis
 ```
 
-Copy the deployable files from this project into the Space repository:
+Copy the deployable files from this repository:
 
 ```text
 Dockerfile
 .dockerignore
 web_api/
 m1_normal_topsis.py
+m2_bagged_topsis.py
+m3_ml_filtered.py
 m4_weighted_bagging.py
+m5_cluster_stratified.py
 m6_reliability_weighted.py
 m7_entropy_reliability.py
 reliability.py
 ```
 
-Also copy these if imports require them later:
-
-```text
-m2_bagged_topsis.py
-m3_ml_filtered.py
-m5_cluster_stratified.py
-external_baselines.py
-```
-
-Create or edit the Space `README.md` so the first lines are:
+Create or edit the Hugging Face Space `README.md` so the first lines are:
 
 ```yaml
 ---
@@ -192,7 +150,7 @@ git push
 
 Hugging Face will build the Docker image and start the app.
 
-## Step 5: Test The Hosted App
+## Test The Hosted App
 
 Open:
 
@@ -200,7 +158,7 @@ Open:
 https://YOUR_USERNAME-earr-topsis.hf.space
 ```
 
-Test:
+Health check:
 
 ```text
 https://YOUR_USERNAME-earr-topsis.hf.space/health
@@ -212,7 +170,7 @@ Expected:
 {"status":"ok","service":"EARR-TOPSIS API","version":"0.2.0"}
 ```
 
-Then test the UI buttons:
+Then test:
 
 - Run Native Example
 - Run Crisp Example
@@ -226,15 +184,11 @@ M6 -> Romania
 M7 -> Austria
 ```
 
-This shows the intended case where M7 handles the structured attack better than M4 and M6.
-
-## Step 6: What To Put In Thesis Or Paper
-
-Use both links:
+## Links To Put In Thesis Or Paper
 
 ```text
 Code and reproducibility repository:
-https://github.com/YOUR_USERNAME/earr-topsis
+https://github.com/Fahim043/earr-topsis
 
 Live demonstration system:
 https://YOUR_USERNAME-earr-topsis.hf.space
@@ -243,28 +197,14 @@ https://YOUR_USERNAME-earr-topsis.hf.space
 Suggested wording:
 
 ```text
-The complete implementation, final evidence tables, method diagrams, and reproducibility scripts are available in the GitHub repository. A live CPU-hosted demonstration system is deployed through Hugging Face Spaces, where users can upload JSON, CSV, TSV, XLS, XLSX, or XLSM decision datasets and compare the three proposed methods.
-```
-
-## Do We Need GitHub Pages?
-
-No.
-
-Use GitHub Pages only if you want a static mirror of the frontend. Since the Hugging Face Space can serve both the UI and backend, GitHub Pages is optional.
-
-Recommended:
-
-```text
-GitHub Pages: off or optional
-GitHub repository: public research archive
-Hugging Face Space: live system
+The complete implementation, method diagrams, final evidence tables, and reproducibility scripts are available in the GitHub repository. A live CPU-hosted demonstration system is deployed through Hugging Face Spaces, where users can upload JSON, CSV, TSV, XLS, XLSX, or XLSM decision datasets and compare the three proposed reliability-aware fuzzy TOPSIS methods.
 ```
 
 ## Limitations To State Honestly
 
 - The hosted system is a research prototype.
 - Free CPU hosting can sleep after inactivity.
-- Large datasets may take time depending on number of alternatives, decision makers, criteria, and bags.
+- Large datasets may take time depending on alternatives, criteria, decision makers, and number of bags.
 - The system does not permanently store uploaded data or results.
 - Confidential datasets should not be uploaded to a public demo.
 - The live tool is for reproducibility and decision-support experimentation, not automatic real-world decision authority.

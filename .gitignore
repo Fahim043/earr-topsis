@@ -15,6 +15,41 @@ _temp*.json
 
 # Keep final evidence, but do not accidentally commit regenerated bulky scratch outputs.
 outputs/attack_fraction_curves_smoke/
+outputs/*
+!outputs/final_evidence/
+!outputs/final_evidence/**
+
+# Keep the public repository focused. These files remain local unless explicitly re-added.
+bracu_thesis_latex/
+thesis_latex/
+docs/
+papers/
+real_datasets/
+*.pdf
+*.docx
+*_PDF_REVIEW.md
+*_pdf_review.md
+*_extracted.txt
+pdf_content.txt
+professor_draft_report.md
+paper_writing_package.md
+THESIS_AND_GITHUB_GUIDE.md
+THESIS_DEFENSE_STUDY_GUIDE.md
+EARR_TOPSIS_STUDY_GUIDE.md
+CODE_FILE_GUIDE.md
+GITHUB_DEPLOYMENT.md
+DR_BFTOPSIS_Comprehensive_Report.md
+render.yaml
+
+# Non-final method variants kept locally for research history.
+m4_disjoint.py
+m5_disjoint.py
+m6_disjoint.py
+test_disjoint_layer3.py
+run_massive_scale_tests.py
+simulate_bagging.py
+universal_implementation_plan.md.resolved
+walkthrough*.md.resolved
 
 # Local OS/editor files
 .idea/

@@ -6,7 +6,7 @@ This folder exposes the three proposed thesis methods through a public API:
 - **M6**: reliability-weighted fuzzy aggregation
 - **M7 / EARR-TOPSIS**: entropy-aware reliability-weighted robust fuzzy TOPSIS
 
-The animated browser dashboard is served from `web_api/static/index.html`. A GitHub Pages copy is available at `../docs/index.html`.
+The animated browser dashboard is served from `web_api/static/index.html`.
 
 ## Local Start
 
@@ -122,8 +122,6 @@ Files that contain only labels or lookup information, such as `country_names.xls
 
 ## Deployment
 
-GitHub Pages can host only the static frontend. Deploy this backend separately to a Python host, or use Hugging Face Spaces to host the frontend and backend together.
-
 Recommended free CPU-only route:
 
 ```text
@@ -137,16 +135,6 @@ uvicorn web_api.app:app --host 0.0.0.0 --port 7860
 ```
 
 See `../HUGGINGFACE_SPACES_DEPLOYMENT.md` for the full step-by-step guide.
-
-Typical Render setup:
-
-```text
-Root directory: web_api
-Build command: pip install -r requirements.txt
-Start command: uvicorn app:app --host 0.0.0.0 --port $PORT
-```
-
-After deployment, open the GitHub Pages UI and paste the backend URL into the **API endpoint** field.
 
 ## Safety
 

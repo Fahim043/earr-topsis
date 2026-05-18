@@ -1,8 +1,6 @@
 # Free Backend Deployment With Hugging Face Spaces
 
-GitHub can host the full repository and README, but GitHub Pages cannot run the Python FastAPI backend. For this project, the clean free option is a **Hugging Face Docker Space** because the algorithm is CPU-only.
-
-If you deploy with Hugging Face Spaces, GitHub Pages is not required. Use GitHub as the public research repository and Hugging Face as the live system.
+GitHub hosts the source repository, README, diagrams, and frozen evidence tables. Hugging Face Spaces hosts the live Python system. For this project, the clean free option is a **Hugging Face Docker Space** because the algorithm is CPU-only.
 
 ## Why This Fits
 
@@ -76,16 +74,6 @@ The same URL is both the website and the API backend. For example:
 https://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space/health
 https://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space/api/run
 ```
-
-## GitHub Pages + Hugging Face Backend
-
-If you also publish `docs/` through GitHub Pages, paste the Hugging Face backend URL into the UI's **API endpoint** field:
-
-```text
-https://YOUR_USERNAME-YOUR_SPACE_NAME.hf.space
-```
-
-For the simplest professor-facing demo, use the Hugging Face Space URL directly because it hosts both frontend and backend together.
 
 ## Limits To Mention Honestly
 
