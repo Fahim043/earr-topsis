@@ -23,7 +23,9 @@ flowchart LR
     E --> F
 ```
 
-GitHub Pages can host the animated static UI. It cannot run Python, so the FastAPI backend must be run locally or deployed to a Python host such as Render, Railway, Hugging Face Spaces, or a university server.
+GitHub Pages can host the animated static UI. It cannot run Python, so the FastAPI backend must be run locally or deployed to a Python host.
+
+For a free CPU-only public demo, the recommended path is **Hugging Face Spaces with Docker**. This can host the animated UI and FastAPI backend together from the same URL. See `HUGGINGFACE_SPACES_DEPLOYMENT.md`.
 
 ## Method Diagrams
 
@@ -135,6 +137,26 @@ Large crisp workbooks can be limited with the `max_alternatives` form field. The
 The backend also recognizes the supplier-selection Excel workbooks used in the thesis experiments when they contain a `Julgamentos DMs` sheet. It extracts the decision-maker blocks and parses hesitant linguistic values such as `[s4]` or `[s3,s4]` into triangular fuzzy numbers.
 
 Lookup-only spreadsheets such as `country_names.xlsx` are intentionally rejected because they do not contain numeric criteria or fuzzy ratings to rank.
+
+## Free Hosted Demo
+
+Recommended free backend option:
+
+1. Create a Hugging Face **Docker Space**.
+2. Use the included `Dockerfile`.
+3. Keep the Space on **CPU Basic** hardware.
+4. Push the project to the Space repository.
+
+The app will run on:
+
+```text
+https://<username>-<space-name>.hf.space
+```
+
+That URL serves both:
+
+- the animated upload UI at `/`
+- the FastAPI backend at `/api/run`
 
 ## GitHub Pages
 

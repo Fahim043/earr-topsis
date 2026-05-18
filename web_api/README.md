@@ -122,7 +122,21 @@ Files that contain only labels or lookup information, such as `country_names.xls
 
 ## Deployment
 
-GitHub Pages can host only the static frontend. Deploy this backend separately to a Python host.
+GitHub Pages can host only the static frontend. Deploy this backend separately to a Python host, or use Hugging Face Spaces to host the frontend and backend together.
+
+Recommended free CPU-only route:
+
+```text
+Hugging Face Spaces -> Docker -> CPU Basic
+```
+
+Use the repository-level `Dockerfile`. It starts:
+
+```bash
+uvicorn web_api.app:app --host 0.0.0.0 --port 7860
+```
+
+See `../HUGGINGFACE_SPACES_DEPLOYMENT.md` for the full step-by-step guide.
 
 Typical Render setup:
 

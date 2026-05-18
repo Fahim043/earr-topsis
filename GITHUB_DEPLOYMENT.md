@@ -42,7 +42,29 @@ https://<username>.github.io/<repo>/
 
 ## 3. Deploy the API Backend
 
-Recommended beginner-friendly option: Render.
+Recommended no-cost CPU option: **Hugging Face Spaces**.
+
+This project includes a repository-level `Dockerfile` that runs FastAPI on port `7860`, which is the standard Docker Space port.
+
+1. Create a Hugging Face Space.
+2. Select:
+   - SDK: `Docker`
+   - Hardware: `CPU Basic`
+3. Push this repository's deployable files to the Space.
+4. The hosted app will be available at:
+
+```text
+https://<username>-<space-name>.hf.space
+```
+
+That one URL serves both:
+
+- frontend: `/`
+- backend: `/api/run`
+
+See `HUGGINGFACE_SPACES_DEPLOYMENT.md` for the full guide.
+
+Alternative beginner-friendly option: Render.
 
 1. Push this repository to GitHub.
 2. Open Render and create a new **Web Service** from the GitHub repo.
