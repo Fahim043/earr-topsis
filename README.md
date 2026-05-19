@@ -242,6 +242,7 @@ Use Hugging Face Spaces with:
 ```text
 SDK: Docker
 Hardware: CPU Basic
+Live Demo Link: https://fahim043-earr-topsis.hf.space
 ```
 
 The included `Dockerfile` starts:
